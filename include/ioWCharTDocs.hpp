@@ -10,6 +10,7 @@
 #include <codecvt>
 #include <functional>
 #include <memory>
+#include <regex>
 
 namespace tag
 {
@@ -57,9 +58,9 @@ struct variant
     explicit variant(double x) : dT_(x){};
 
 
-    variant& operator[] (const wchar_t* key) //для текущей программы
+    std::unique_ptr<variant>& operator[] (const wchar_t* key) //для текущей программы
     {
-        return *dT_.mapWStrDif_t[key];
+        return dT_.mapWStrDif_t[key];
     }
 
     std::wstring& operator[](const size_t& idx)
@@ -110,6 +111,22 @@ struct variant
     bool is_empty_map() const
     {
         return dT_.mapWStrDif_t.empty();
+    }
+
+    void incWStr()
+    {
+        std::wstring::iterator it  = dT_.wStr_t.end() - 1;
+
+        while(true)
+        {
+            if (*it == L'9') {
+                *it = L'0';
+                --it;
+            } else {
+                ++(*it);
+                break;
+            }
+        }
     }
 
 
@@ -164,10 +181,16 @@ class fileContainer
        static std::locale empty;
        file.imbue(std::locale(empty, new std::codecvt_utf8_utf16<wchar_t>));
 
-       std::wstringstream wss;
-       wss << file.rdbuf();
 
-       std::wstring buffer = wss.str();
+       std::wstringstream wss;
+       std::wstring buffer;
+       wss << file.rdbuf();
+       buffer = wss.str();
+
+       if(buffer.empty())
+       {
+           buffer = L"{}";
+       }
 
        auto bufIt = buffer.begin();
 
@@ -275,6 +298,57 @@ class fileContainer
                        buffer += L"\n";
                    }
                }
+               else if(it[idx]->second->is_vecWStr())
+               {
+                   if (it[idx]->second->get_vector().empty())
+                   {
+                        buffer += L"[]";
+
+                       if(++it[idx] != end[idx])
+                       {
+                           buffer += L",\n";
+                       }
+                       else
+                       {
+                           buffer += L"\n";
+                       }
+                   }
+                   else
+                   {
+                       buffer += L"\n[\n";
+
+                       spaceCount += 2;
+
+                       for (size_t b{0}, e{it[idx]->second->get_vector().size()}; b < e; ++b) {
+
+                           for (size_t i{0}; i < spaceCount; ++i) {
+                               buffer += L" ";
+                           }
+
+                           buffer += L"\"";
+                           buffer += it[idx]->second->get_vector()[b];
+                           buffer += L"\"";
+
+                           if (b + 1 < e) {
+                               buffer += L",\n";
+                           } else {
+                               buffer += L"\n";
+                           }
+                       }
+                       spaceCount -= 2;
+
+                       for (size_t i{0}; i < spaceCount; ++i) {
+                           buffer += L" ";
+                       }
+
+                       buffer += L"]";
+
+                       if(++it[idx] != end[idx])
+                       {
+                           buffer += L",\n";
+                       }
+                   }
+               }
            }
        }
 
@@ -284,9 +358,9 @@ class fileContainer
        file.close();
    }
 
-   variant& operator[](const wchar_t* key)
+   std::unique_ptr<variant>& operator[](const wchar_t* key)
    {
-       return *container[key];
+       return container[key];
    }
 
    std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator find(const std::wstring& key)
@@ -296,7 +370,7 @@ class fileContainer
        typedef std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator    mapIt_t;
        bool isFind{false};
 
-       std::function<mapIt_t(mapRef_t)> finder = [&key, &finder, &isFind](mapRef_t mRef)
+       std::function<mapIt_t(mapRef_t)> finder = [&key, &finder, &isFind](mapRef_t mRef) -> auto
        {
            mapIt_t findIt{mRef.find(key)};
            if(findIt != mRef.end())
@@ -379,6 +453,12 @@ private:
             {
                 ++bufIt;
             }
+        }
+
+        if(*bufIt == ']' && !vecHasMake)
+        {
+            tag::vecWStr vs;
+            ptr = std::make_unique<variant>(vs);
         }
     }
 

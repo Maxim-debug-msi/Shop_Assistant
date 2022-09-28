@@ -9,26 +9,21 @@
 #include "edit_prodGroup_form.h"
 
 forms::prodGroup_editor::prodGroup_editor() : mainWgt(new QWidget(nullptr)), viewModel(new QTreeView(mainWgt)),
-oT_model(new models::objectTree_model(viewModel)), data(nullptr), model(nullptr), remElem_btn(new QPushButton),
+oT_model(new models::objectTree_model(viewModel)), data(nullptr), remElem_btn(new QPushButton),
 addElem_btn(new QPushButton), textLine(new QLineEdit), gl(new QGridLayout),
 hl(new QHBoxLayout), hl1(new QHBoxLayout), hl2(new QHBoxLayout), vl(new QVBoxLayout){}
 
 forms::prodGroup_editor::~prodGroup_editor()
 {
-    //delete mainWgt;
+    delete mainWgt;
 }
 
-void forms::prodGroup_editor::setModelPtr(dataContain::prodTree_model* model_)
-{
-    model = model_;
-}
-
-void forms::prodGroup_editor::setDataPtr(dataContain::prod_data* data_)
+void forms::prodGroup_editor::setDataPtr(implData* data_)
 {
     data = data_;
 }
 
-void forms::prodGroup_editor::build()
+void forms::prodGroup_editor::setupUI()
 {
     std::function<void(std::unordered_map<std::wstring, std::unique_ptr<variant>>&, QObject*)> extractor =
             [&extractor, this](std::unordered_map<std::wstring, std::unique_ptr<variant>>& map, QObject* parent)
@@ -36,7 +31,7 @@ void forms::prodGroup_editor::build()
                 for(auto&& it : map)
                 {
                     obj_list.push_back(new QObject(parent));
-                    obj_list[obj_list.size() - 1]->setObjectName(QString::fromStdWString(it.first));
+                    obj_list.last()->setObjectName(QString::fromStdWString(it.first));
 
                     if(it.second->is_map() && !it.second->is_empty_map())
                     {
@@ -45,7 +40,7 @@ void forms::prodGroup_editor::build()
                 }
             };
 
-    extractor(model->groupMap_.get(), nullptr);
+    extractor(data->prodInfo.prodInfo.get()[L"Группы"]->get_map(), nullptr);
 
     QStringList cols;
     cols << "objectName";
@@ -87,8 +82,7 @@ void forms::prodGroup_editor::build()
         obj->setObjectName(textLine->text());
         obj->setParent(static_cast<QObject*>(viewModel->selectionModel()->currentIndex().internalPointer()));
 
-        std::wstring key = obj->parent()->objectName().toStdWString();
-        auto& it = model->groupMap_.find(key)->second;
+        auto& it = data->prodInfo.prodInfo.find(obj->parent()->objectName().toStdWString())->second;
 
         tag::mapWStrVar mwsv;
         it->get_map().insert(std::pair<std::wstring, std::unique_ptr<variant>>(textLine->text().toStdWString(),
@@ -97,10 +91,10 @@ void forms::prodGroup_editor::build()
 
     QObject::connect(remElem_btn, &QPushButton::clicked, [this](){
         auto*        obj = static_cast<QObject*>(viewModel->selectionModel()->currentIndex().internalPointer());
-        auto&        map = model->groupMap_.find(obj->parent()->objectName().toStdWString())->second->get_map();
+        auto&        map = data->prodInfo.prodInfo.find(obj->parent()->objectName().toStdWString())->second->get_map();
         auto         itForDel = map.find(obj->objectName().toStdWString());
 
-        model->groupMap_.find(obj->parent()->objectName().toStdWString())->second->get_map().erase(itForDel);
+        data->prodInfo.prodInfo.find(obj->parent()->objectName().toStdWString())->second->get_map().erase(itForDel);
         obj->setObjectName("*удаление*");
     });
 }

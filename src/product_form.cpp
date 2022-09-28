@@ -10,14 +10,14 @@
 #include "product_form.h"
 
 forms::prodTable_form::prodTable_form() : QObject(nullptr), mainWgt(new QWidget), viewModel(new QTreeView(mainWgt)),
-oT_model(new models::objectTree_model(viewModel)), model(nullptr), table(new QWidget(mainWgt)), data(nullptr){}
+oT_model(new models::objectTree_model(viewModel)), table(new QWidget(mainWgt)), data(nullptr){}
 
 forms::prodTable_form::~prodTable_form()
 {
     delete mainWgt;
 }
 
-void forms::prodTable_form::drowTable()
+void forms::prodTable_form::drawTable()
 {
     std::wstring key{oT_model->data(viewModel->selectionModel()->currentIndex(), Qt::DisplayRole).toString().toStdWString()};
 
@@ -28,7 +28,7 @@ void forms::prodTable_form::drowTable()
         table->layout()->removeWidget(widget);
     }
 
-    if(data->products.find(key) == data->products.end())
+    if(data->prodContain.products.find(key) == data->prodContain.products.end())
     {
         return;
     }
@@ -37,12 +37,12 @@ void forms::prodTable_form::drowTable()
     tables[key]->setVisible(true);
 }
 
-void forms::prodTable_form::setDataPtr(dataContain::prod_data* data_)
+void forms::prodTable_form::setDataPtr(implData* data_)
 {
     data = data_;
 }
 
-void forms::prodTable_form::build()
+void forms::prodTable_form::setupUI()
 {
     std::function<void(std::unordered_map<std::wstring, std::unique_ptr<variant>>&, QObject*)> extractor =
             [&extractor, this](std::unordered_map<std::wstring, std::unique_ptr<variant>>& map, QObject* parent)
@@ -50,7 +50,7 @@ void forms::prodTable_form::build()
                 for(auto&& it : map)
                 {
                     obj_list.push_back(new QObject(parent));
-                    obj_list[obj_list.size() - 1]->setObjectName(QString::fromStdWString(it.first));
+                    obj_list.last()->setObjectName(QString::fromStdWString(it.first));
 
                     if(it.second != nullptr && it.second->is_map() && !it.second->is_empty_map())
                     {
@@ -59,7 +59,7 @@ void forms::prodTable_form::build()
                 }
             };
 
-    extractor(model->groupMap_.get(), nullptr);
+    extractor(data->prodInfo.prodInfo[L"Группы"]->get_map(), nullptr);
 
     QStringList cols;
     cols << "objectName";
@@ -88,7 +88,7 @@ void forms::prodTable_form::build()
     mainWgt->setLayout(l);
 
     QObject::connect(viewModel->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-                     this, SLOT(drowTable()));
+                     this, SLOT(drawTable()));
 
     QObject::connect(btn, &QPushButton::clicked, [this, btn]()
     {
@@ -104,10 +104,9 @@ void forms::prodTable_form::build()
         }
     });
 
-    for(auto&& prod_group : data->products)//build tables
+    for(auto&& prod_group : data->prodContain.products.get())//build tables
     {
         tables[prod_group.first] = new QTableWidget;
-
         tables[prod_group.first]->setRowCount(static_cast<int>(prod_group.second->map_size()));
         tables[prod_group.first]->setColumnCount(4);
         tables[prod_group.first]->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
@@ -127,7 +126,7 @@ void forms::prodTable_form::build()
             tables[prod_group.first]->setItem(row, 2, new QTableWidgetItem(QString::fromStdWString(product.second->get_map()[L"Количество"]->get_wstring())));
             tables[prod_group.first]->item(row, 2)->setFlags(tables[prod_group.first]->item(row, 2)->flags() ^ Qt::ItemIsEditable);
 
-            tables[prod_group.first]->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString(product.second->get_map()[L"Цена"]->get_wstring())));
+            tables[prod_group.first]->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString(product.second->get_map()[L"р_цена"]->get_wstring())));
             tables[prod_group.first]->item(row, 3)->setFlags(tables[prod_group.first]->item(row, 3)->flags() ^ Qt::ItemIsEditable);
 
             prodSearch_code[product.second->get_map()[L"Код"]->get_wstring()] = {tables[prod_group.first], row};
@@ -137,7 +136,3 @@ void forms::prodTable_form::build()
     }
 }
 
-void forms::prodTable_form::setModelPtr(dataContain::prodTree_model* model_)
-{
-    model = model_;
-}

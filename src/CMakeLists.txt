@@ -8,9 +8,10 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "C:/Users/Maxim/Desktop/Programming/Qt/5.15.2/mingw81_64/lib/cmake")
 set(SOURCES main.cpp ../include/UI/UI.ui MainWindow.cpp product_form.cpp objectTree_model.cpp Data.cpp
-        edit_prodGroup_form.cpp addProd_form.cpp)
+        edit_prodGroup_form.cpp receptFromTransit_form.cpp addProd_form.cpp docJournal_form.cpp)
 set(LIBS ../include/UI/MainWindow.h ../include/models/objectTree_model.h ../include/forms/product_form.h
-        ../include/forms/edit_prodGroup_form.h ../include/forms/addProd_form.h)
+        ../include/forms/edit_prodGroup_form.h ../include/forms/receptFromTransit_form.h ../include/forms/addProd_form.h
+        ../include/forms/docJournal_form.h)
 
 find_package(Qt5 COMPONENTS
         Core

@@ -28,7 +28,13 @@ public slots:
 
     void create_editProdGroup();
 
-    void create_addProducts();
+    void create_receptFromTransit();
+
+    void create_addProd();
+
+    void create_docJournal();
+
+    static void logger(const QString& message, QTextBrowser*);
 
 private:
     Ui::MainWindow* ui;

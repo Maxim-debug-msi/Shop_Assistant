@@ -9,6 +9,7 @@
 #include <QTreeView>
 #include <QPushButton>
 #include <QLayout>
+#include "implementations/implData.h"
 #include "data/Data.h"
 
 namespace forms
@@ -23,11 +24,9 @@ namespace forms
 
         ~prodGroup_editor() override;
 
-        void setModelPtr(dataContain::prodTree_model *);
+        void setDataPtr(implData*);
 
-        void setDataPtr(dataContain::prod_data *);
-
-        void build();
+        void setupUI();
 
     public:
         QWidget *mainWgt;
@@ -46,8 +45,7 @@ namespace forms
         QHBoxLayout* hl2;
         QVBoxLayout* vl;
 
-        dataContain::prod_data *data;
-        dataContain::prodTree_model *model;
+        implData *data;
     };
 }
 #endif //SHOP_ASSISTANT_EDIT_PRODGROUP_FORM_H

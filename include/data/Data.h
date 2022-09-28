@@ -5,6 +5,7 @@
 #ifndef SHOP_ASSISTANT_DATA_H
 #define SHOP_ASSISTANT_DATA_H
 
+#include <QTextBrowser>
 #include <map>
 #include <vector>
 #include <memory>
@@ -13,7 +14,7 @@
 
 namespace dataContain
 {
-    struct prod_data
+    struct prodContainer
     {
         void upload(const std::string&);
         void save(const std::string&);
@@ -22,13 +23,34 @@ namespace dataContain
         fileContainer products;
     };
 
-    struct prodTree_model
+    struct prodInfo
     {
         void upload(const std::string&);
         void save(const std::string&);
 
     public:
-        fileContainer groupMap_;
+        fileContainer prodInfo;
     };
+
+    struct addProd_doc
+    {
+        void upload(const std::string&);
+        void save(const std::string&);
+
+    public:
+        fileContainer docs;
+    };
+
+    struct docInfo
+    {
+        void upload(const std::string&);
+        void save(const std::string&);
+
+    public:
+        fileContainer docInfo;
+    };
+
+    std::wstring w_asctime(std::tm*);
+    std::map<std::wstring, std::unordered_map<std::wstring, std::unique_ptr<variant>>&> docsRefs;
 }
 #endif //SHOP_ASSISTANT_DATA_H

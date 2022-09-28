@@ -8,14 +8,20 @@ p_implForms(new implForms)
 {
     ui->setupUi(this);
 
-    p_ImplData->prodData.upload("C:/Users/Maxim/CLionProjects/shop_assistant/bin/products.json");
-    p_ImplData->prodTreeModel.upload("C:/Users/Maxim/CLionProjects/shop_assistant/bin/prod_groups.json");
+    p_ImplData->prodContain.upload("C:/Users/Maxim/CLionProjects/shop_assistant/bin/products.json");
+    p_ImplData->prodInfo.upload("C:/Users/Maxim/CLionProjects/shop_assistant/bin/prodInfo.json");
+    p_ImplData->docInfo.upload("C:/Users/Maxim/CLionProjects/shop_assistant/docs/docInfo.json");
+
+    p_ImplData->addProdDoc.upload("C:/Users/Maxim/CLionProjects/shop_assistant/docs/addProd_doc.json");
 }
 
 MainWindow::~MainWindow()
 {
-    p_ImplData->prodData.save("C:/Users/Maxim/CLionProjects/shop_assistant/bin/products1.json");
-    p_ImplData->prodTreeModel.save("C:/Users/Maxim/CLionProjects/shop_assistant/bin/prod_groups1.json");
+    p_ImplData->prodContain.save("C:/Users/Maxim/CLionProjects/shop_assistant/bin/products.json");
+    p_ImplData->prodInfo.save("C:/Users/Maxim/CLionProjects/shop_assistant/bin/prodInfo.json");
+    p_ImplData->addProdDoc.save("C:/Users/Maxim/CLionProjects/shop_assistant/docs/addProd_doc.json");
+    p_ImplData->docInfo.save("C:/Users/Maxim/CLionProjects/shop_assistant/docs/docInfo.json");
+
     delete ui;
     delete p_implForms;
     delete p_ImplData;
@@ -24,9 +30,8 @@ MainWindow::~MainWindow()
 void MainWindow::create_productTable()
 {
     auto* newPT_f = new forms::prodTable_form();
-    newPT_f->setModelPtr(&p_ImplData->prodTreeModel);
-    newPT_f->setDataPtr(&p_ImplData->prodData);
-    newPT_f->build();
+    newPT_f->setDataPtr(p_ImplData);
+    newPT_f->setupUI();
     newPT_f->mainWgt->setParent(ui->mdiArea);
     ui->mdiArea->addSubWindow(newPT_f->mainWgt);
     newPT_f->mainWgt->showMaximized();
@@ -41,22 +46,53 @@ void MainWindow::show_hide_servMes()
 void MainWindow::create_editProdGroup()
 {
     auto* newPG_e = new forms::prodGroup_editor();
-    newPG_e->setModelPtr(&p_ImplData->prodTreeModel);
-    newPG_e->setDataPtr(&p_ImplData->prodData);
-    newPG_e->build();
+    newPG_e->setDataPtr(p_ImplData);
+    newPG_e->setupUI();
     newPG_e->mainWgt->setParent(ui->mdiArea);
     ui->mdiArea->addSubWindow(newPG_e->mainWgt);
     newPG_e->mainWgt->showMaximized();
 }
 
-void MainWindow::create_addProducts()
+void MainWindow::create_receptFromTransit()
 {
-    auto newAP_f = new forms::addProd();
-    newAP_f->setDataPtr(&p_ImplData->prodData);
-    newAP_f->setModelPtr(&p_ImplData->prodTreeModel);
-    newAP_f->setupUi();
+    auto newRFT_f = new forms::receptFromTransit_form();
+    newRFT_f->setDataPtr(p_ImplData);
+    newRFT_f->setupUi();
+    newRFT_f->mainWgt->setParent(ui->mdiArea);
+    ui->mdiArea->addSubWindow(newRFT_f->mainWgt);
+    newRFT_f->mainWgt->showMaximized();
+}
+
+void MainWindow::create_addProd()
+{
+    auto newAP_f = new forms::addProduct_form();
+    newAP_f->setDataPtr(p_ImplData);
+    newAP_f->setLog_ptr(ui->serviceMessages);
+    newAP_f->setupUI();
     newAP_f->mainWgt->setParent(ui->mdiArea);
     ui->mdiArea->addSubWindow(newAP_f->mainWgt);
-    newAP_f->mainWgt->showMaximized();
+    newAP_f->mainWgt->show();
+}
+
+void MainWindow::logger(const QString &message, QTextBrowser *log)
+{
+    char buffer[25];
+    std::time_t t = std::time(nullptr);
+    std::tm* now = std::localtime(&t);
+    const char* format = "%d.%m.%Y %HH:%MM:%SS";
+    strftime(buffer, 25, format, now);
+
+    log->setMarkdown(log->toMarkdown() + "[" + buffer + "]" + " " + message);
+}
+
+void MainWindow::create_docJournal()
+{
+    auto newDJ_f = new forms::docJournal_form();
+    newDJ_f->setLog_ptr(ui->serviceMessages);
+    newDJ_f->setData_ptr(p_ImplData);
+    newDJ_f->setupUI();
+    newDJ_f->mainWgt->setParent(ui->mdiArea);
+    ui->mdiArea->addSubWindow(newDJ_f->mainWgt);
+    newDJ_f->mainWgt->showMaximized();
 }
 

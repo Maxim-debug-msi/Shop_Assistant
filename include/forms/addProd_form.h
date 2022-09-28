@@ -1,68 +1,125 @@
 //
-// Created by Maxim on 02.09.2022.
+// Created by Maxim on 05.09.2022.
 //
 
 #ifndef SHOP_ASSISTANT_ADDPROD_FORM_H
 #define SHOP_ASSISTANT_ADDPROD_FORM_H
+
 #include <QObject>
+#include <QLineEdit>
 #include <QLayout>
-#include <QTableWidget>
 #include <QPushButton>
-#include <QVector>
 #include <QComboBox>
-#include <vector>
-#include <string>
+#include <QDateEdit>
+#include <QSpinBox>
+#include <QTextBrowser>
+#include <QToolButton>
+#include <QMenu>
+#include <ctime>
+#include "implementations/implData.h"
 #include "data/Data.h"
-#include "models/objectTree_model.h"
 
-struct prodProperties
-{
-
-};
-
-namespace forms
-{
-    class addProd : QObject
-    {
-        Q_OBJECT
+namespace forms {
+    class addProduct_form : QObject {
+    Q_OBJECT
 
     public:
-        addProd();
+        addProduct_form();
 
-        ~addProd() override;
+        ~addProduct_form() override;
 
-        void setDataPtr(dataContain::prod_data*);
+        void setupUI();
 
-        void setModelPtr(dataContain::prodTree_model*);
+        void setDataPtr(implData*);
 
-        void setupUi();
+        void setLog_ptr(QTextBrowser*);
+
+        void saveDoc();
+
+        void blockEdit(const bool&);
+
+    private slots:
+        void editedForm();
+
+        void uneditedForm();
+
+        void addProduct();
 
     public:
-        QWidget* mainWgt;
+        QWidget *mainWgt;
 
-    private: //widgets
-        QTableWidget* table;
-        QPushButton* addProduct;
-        QPushButton* delProduct;
+    private:
+        std::time_t time = std::time(nullptr);
+        std::tm* const pTInfo = std::localtime(&time);
+
+        QLineEdit* docNum;
+        QLineEdit* summaryDocNum;
+
+        QLineEdit* summaryDocDate;
+        QLineEdit* docDate;
+
         QComboBox* groupList;
+        QLineEdit* summaryGL;
 
-        QPushButton* write;
-        QPushButton* enter;
+        QLineEdit* EANCode;
+        QLineEdit* summaryEANCode;
 
-    private: //layouts
-        QVBoxLayout* vl;
-        QHBoxLayout* hl;
-        QGridLayout* gl;
-        QHBoxLayout* hl2;
+        QLineEdit *code;
+        QLineEdit* summaryCode;
 
-    private: //data
+        QLineEdit *name;
+        QLineEdit* summaryName;
+
+        QDoubleSpinBox *count;
+        QLineEdit* summaryCount;
+
+        QLineEdit* summaryRPrice;
+        QDoubleSpinBox* rPrice;
+
+        QDoubleSpinBox* price;
+        QLineEdit* summaryPrice;
+
+        QSpinBox *expirationDate;
+        QLineEdit* summaryDate;
+
+        QLineEdit* summaryEndDate;
+        QDateEdit* endDate;
+
+        QPushButton* enterProd_btn;
+        QPushButton* deleteProd_btn;
+        QPushButton* writeProd_btn;
+        QToolButton* actions_btn;
+
+        QMenu* menu;
+        QAction* remEnter_act;
+        QAction* remDel_act;
+
+        QLineEdit* status;
+        QLineEdit* creator;
+
+    private:
+        QVBoxLayout *vl;
+        QHBoxLayout *hl1;
+        QHBoxLayout *hl2;
+        QHBoxLayout *hl3;
+        QHBoxLayout *hl4;
+        QHBoxLayout *hl5;
+        QHBoxLayout *hl6;
+        QHBoxLayout* hl7;
+        QHBoxLayout* hl8;
+        QHBoxLayout* hl9;
+        QHBoxLayout* hl10;
+        QHBoxLayout* hl11;
+        QHBoxLayout* hl12;
+        QHBoxLayout* hl13;
+
+    private:
         QVector<QObject*> obj_list;
-        dataContain::prod_data* data;
-        dataContain::prodTree_model* model;
+        implData* data;
         models::objectTree_model* oT_model;
-
-        std::wstring docNum;
-        std::wstring nameOfCreator;
+        QTextBrowser* log;
+        std::wstring* nameBuf;
+        bool isHasEdit;
     };
 }
 #endif //SHOP_ASSISTANT_ADDPROD_FORM_H

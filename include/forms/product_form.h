@@ -10,6 +10,7 @@
 #include <QTreeView>
 #include <vector>
 #include "models/objectTree_model.h"
+#include "implementations/implData.h"
 #include "data/Data.h"
 
 namespace forms
@@ -22,14 +23,12 @@ namespace forms
 
         ~prodTable_form() override;
 
-        void build();
+        void setupUI();
 
-        void setModelPtr(dataContain::prodTree_model*);
+        void setDataPtr(implData*);
 
-        void setDataPtr(dataContain::prod_data*);
-
-    public slots:
-        void drowTable();
+    private slots:
+        void drawTable();
 
     public:
         QWidget* mainWgt;
@@ -41,8 +40,7 @@ namespace forms
         QTreeView* viewModel;
         QVector<QObject*> obj_list;
         models::objectTree_model* oT_model;
-        dataContain::prod_data* data;
-        dataContain::prodTree_model* model;
+        implData* data;
     };
 }
 

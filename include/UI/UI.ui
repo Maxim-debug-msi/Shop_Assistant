@@ -43,9 +43,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="add_Products">
+         <widget class="QPushButton" name="receptFromTransit_btn">
           <property name="text">
-           <string>Добавление товаров</string>
+           <string>Прием с транзита</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="addProd_btn">
+          <property name="text">
+           <string>Завести новый товар</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Журнал документов</string>
           </property>
          </widget>
         </item>
@@ -176,10 +190,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>add_Products</sender>
+   <sender>receptFromTransit_btn</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>create_addProducts()</slot>
+   <slot>create_receptFromTransit()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>382</x>
@@ -191,11 +205,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>addProd_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>create_addProd()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>558</x>
+     <y>35</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>635</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>create_docJournal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>628</x>
+     <y>29</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>46</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>create_editProdGroup()</slot>
   <slot>show_hide_servMes()</slot>
   <slot>create_productTable()</slot>
-  <slot>create_addProducts()</slot>
+  <slot>create_receptFromTransit()</slot>
+  <slot>create_addProd()</slot>
+  <slot>create_docJournal()</slot>
  </slots>
 </ui>

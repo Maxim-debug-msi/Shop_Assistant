@@ -7,12 +7,16 @@
 
 #include "forms/product_form.h"
 #include "forms/edit_prodGroup_form.h"
+#include "forms/receptFromTransit_form.h"
 #include "forms/addProd_form.h"
+#include "forms/docJournal_form.h"
 
 struct implForms
 {
     forms::prodTable_form pT_f;
     forms::prodGroup_editor pG_e;
-    forms::addProd aP_f;
+    forms::receptFromTransit_form rFT_f;
+    forms::addProduct_form aP_f;
+    forms::docJournal_form dJ_f;
 };
 #endif //SHOP_ASSISTANT_IMPLFORMS_H

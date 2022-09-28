@@ -9,7 +9,10 @@
 
 struct implData
 {
-    dataContain::prod_data prodData;
-    dataContain::prodTree_model prodTreeModel;
+    dataContain::prodContainer prodContain;
+    dataContain::prodInfo prodInfo;
+    dataContain::addProd_doc addProdDoc;
+    dataContain::docInfo docInfo;
+
 };
 #endif //SHOP_ASSISTANT_IMPLDATA_H
