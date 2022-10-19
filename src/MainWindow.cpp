@@ -12,7 +12,7 @@ p_implForms(new implForms)
     p_ImplData->prodInfo.upload("C:/Users/Maxim/CLionProjects/shop_assistant/bin/prodInfo.json");
     p_ImplData->docInfo.upload("C:/Users/Maxim/CLionProjects/shop_assistant/docs/docInfo.json");
 
-    p_ImplData->addProdDoc.upload("C:/Users/Maxim/CLionProjects/shop_assistant/docs/addProd_doc.json");
+    p_ImplData->addProdDoc.upload("C:/Users/Maxim/CLionProjects/shop_assistant/docs/addProd_doc.json", p_ImplData->docsPtr);
 }
 
 MainWindow::~MainWindow()
@@ -65,13 +65,25 @@ void MainWindow::create_receptFromTransit()
 
 void MainWindow::create_addProd()
 {
-    auto newAP_f = new forms::addProduct_form();
+    auto newAP_f = new forms::addProduct_form;
+    auto subWindow = new QMdiSubWindow(ui->mdiArea);
+
+    subWindow->setWidget(newAP_f->mainWgt);
+    subWindow->setAttribute(Qt::WA_DeleteOnClose);
+
     newAP_f->setDataPtr(p_ImplData);
     newAP_f->setLog_ptr(ui->serviceMessages);
     newAP_f->setupUI();
-    newAP_f->mainWgt->setParent(ui->mdiArea);
-    ui->mdiArea->addSubWindow(newAP_f->mainWgt);
-    newAP_f->mainWgt->show();
+
+    ui->mdiArea->addSubWindow(subWindow);
+
+    subWindow->show();
+
+    QObject::connect(newAP_f->mainWgt, &QWidget::destroyed, [newAP_f, subWindow, this]()
+    {
+        delete newAP_f;
+        ui->mdiArea->removeSubWindow(subWindow);
+    });
 }
 
 void MainWindow::logger(const QString &message, QTextBrowser *log)
@@ -90,9 +102,11 @@ void MainWindow::create_docJournal()
     auto newDJ_f = new forms::docJournal_form();
     newDJ_f->setLog_ptr(ui->serviceMessages);
     newDJ_f->setData_ptr(p_ImplData);
+    newDJ_f->setMainWindow_ptr(ui->mdiArea);
     newDJ_f->setupUI();
     newDJ_f->mainWgt->setParent(ui->mdiArea);
     ui->mdiArea->addSubWindow(newDJ_f->mainWgt);
     newDJ_f->mainWgt->showMaximized();
 }
+
 

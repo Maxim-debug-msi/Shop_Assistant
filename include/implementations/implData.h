@@ -13,6 +13,6 @@ struct implData
     dataContain::prodInfo prodInfo;
     dataContain::addProd_doc addProdDoc;
     dataContain::docInfo docInfo;
-
+    std::map<std::wstring, dataContain::docContainer*> docsPtr;
 };
 #endif //SHOP_ASSISTANT_IMPLDATA_H

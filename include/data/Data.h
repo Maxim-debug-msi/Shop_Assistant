@@ -14,6 +14,13 @@
 
 namespace dataContain
 {
+    struct docContainer
+    {
+        fileContainer docs;
+        std::unordered_map<std::wstring, std::vector<time_t>> docsOfCreator;
+        std::vector<time_t> docsOfDate;
+    };
+
     struct prodContainer
     {
         void upload(const std::string&);
@@ -34,11 +41,11 @@ namespace dataContain
 
     struct addProd_doc
     {
-        void upload(const std::string&);
+        void upload(const std::string&, std::map<std::wstring, dataContain::docContainer*>&);
         void save(const std::string&);
 
     public:
-        fileContainer docs;
+        docContainer doc;
     };
 
     struct docInfo
@@ -51,6 +58,5 @@ namespace dataContain
     };
 
     std::wstring w_asctime(std::tm*);
-    std::map<std::wstring, std::unordered_map<std::wstring, std::unique_ptr<variant>>&> docsRefs;
 }
 #endif //SHOP_ASSISTANT_DATA_H

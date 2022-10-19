@@ -15,16 +15,17 @@
 #include <QTextBrowser>
 #include <QToolButton>
 #include <QMenu>
+#include <QCloseEvent>
 #include <ctime>
 #include "implementations/implData.h"
 #include "data/Data.h"
 
 namespace forms {
-    class addProduct_form : QObject {
+    class addProduct_form : public QObject {
     Q_OBJECT
 
     public:
-        addProduct_form();
+        addProduct_form(const std::wstring& docNum = L"", QWidget* parent = nullptr);
 
         ~addProduct_form() override;
 
@@ -34,9 +35,14 @@ namespace forms {
 
         void setLog_ptr(QTextBrowser*);
 
+    private:
         void saveDoc();
 
-        void blockEdit(const bool&);
+        void blockFieldsEdit(const bool&);
+
+        void blockEdit();
+
+        void fillFields(const std::wstring& docNumber = L"");
 
     private slots:
         void editedForm();
@@ -46,11 +52,11 @@ namespace forms {
         void addProduct();
 
     public:
-        QWidget *mainWgt;
+        QWidget* mainWgt;
 
     private:
-        std::time_t time = std::time(nullptr);
-        std::tm* const pTInfo = std::localtime(&time);
+        std::time_t* time = new std::time_t(std::time(nullptr));
+        std::tm* pTInfo = std::localtime(time);
 
         QLineEdit* docNum;
         QLineEdit* summaryDocNum;
@@ -76,7 +82,7 @@ namespace forms {
         QLineEdit* summaryRPrice;
         QDoubleSpinBox* rPrice;
 
-        QDoubleSpinBox* price;
+        QDoubleSpinBox* optPrice;
         QLineEdit* summaryPrice;
 
         QSpinBox *expirationDate;
@@ -84,6 +90,9 @@ namespace forms {
 
         QLineEdit* summaryEndDate;
         QDateEdit* endDate;
+
+        QLineEdit* summaryComment;
+        QLineEdit* comment;
 
         QPushButton* enterProd_btn;
         QPushButton* deleteProd_btn;
@@ -112,14 +121,20 @@ namespace forms {
         QHBoxLayout* hl11;
         QHBoxLayout* hl12;
         QHBoxLayout* hl13;
+        QHBoxLayout* hl14;
 
     private:
-        QVector<QObject*> obj_list;
+        QVector<QObject*> modelWidgets;
         implData* data;
         models::objectTree_model* oT_model;
         QTextBrowser* log;
         std::wstring* nameBuf;
+        std::wstring* docNumber;
         bool isHasEdit;
+
+        std::map<std::wstring, int> docStates{{L"Записан", 0},
+                                              {L"Проведён", 1},
+                                              {L"Удалён", 2}};
     };
 }
 #endif //SHOP_ASSISTANT_ADDPROD_FORM_H

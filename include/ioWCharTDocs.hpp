@@ -34,6 +34,18 @@ union diff_type
     explicit diff_type(bool x) : bool_t(x) {};
     explicit diff_type(double x) : double_t(x){};
 
+    diff_type(const diff_type& oth)
+    {
+        this->mapWStrDif_t = oth.mapWStrDif_t;
+        this->wStr_t = oth.wStr_t;
+        this->vecWStr_t = oth.vecWStr_t;
+        this->vecInt_t = oth.vecInt_t;
+        this->vecDouble_t = oth.vecDouble_t;
+        this->bool_t = oth.bool_t;
+        this->int_t = oth.int_t;
+        this->double_t = oth.double_t;
+    };
+
     int                                                            int_t;
     double                                                         double_t;
     bool                                                           bool_t;
@@ -41,7 +53,7 @@ union diff_type
     std::vector<std::wstring>                                      vecWStr_t;
     std::vector<int>                                               vecInt_t;
     std::vector<double>                                            vecDouble_t;
-    std::unordered_map<std::wstring, std::unique_ptr<variant>>     mapWStrDif_t;
+    std::unordered_map<std::wstring, variant*>                     mapWStrDif_t;
 
     ~diff_type(){};
 };
@@ -57,8 +69,16 @@ struct variant
     explicit variant(bool x) : dT_(x){};
     explicit variant(double x) : dT_(x){};
 
+    variant(const variant& oth) : dT_(oth.dT_){
+        this->mwsv_ = oth.mwsv_;
+        this->vecWStr_ = oth.vecWStr_;
+        this->vecInt_ = oth.vecInt_;
+        this->vecDouble_ = oth.vecDouble_;
+        this->ws_ = oth.ws_;
+    }
 
-    std::unique_ptr<variant>& operator[] (const wchar_t* key) //для текущей программы
+
+    variant* operator[] (const wchar_t* key) //для текущей программы
     {
         return dT_.mapWStrDif_t[key];
     }
@@ -83,7 +103,7 @@ struct variant
         return dT_.mapWStrDif_t.size();
     }
 
-    std::unordered_map<std::wstring, std::unique_ptr<variant>>& get_map()
+    std::unordered_map<std::wstring, variant*>& get_map()
     {
         return dT_.mapWStrDif_t;
     }
@@ -208,8 +228,8 @@ class fileContainer
        size_t       spaceCount{2};
        size_t       idx{0};
 
-       std::vector<std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator> it;
-       std::vector<std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator> end;
+       std::vector<std::unordered_map<std::wstring, variant*>::iterator> it;
+       std::vector<std::unordered_map<std::wstring, variant*>::iterator> end;
 
        it.push_back(container.begin());
        end.push_back(container.end());
@@ -358,16 +378,16 @@ class fileContainer
        file.close();
    }
 
-   std::unique_ptr<variant>& operator[](const wchar_t* key)
+   variant* operator[](const std::wstring& key)
    {
        return container[key];
    }
 
-   std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator find(const std::wstring& key)
+   std::unordered_map<std::wstring, variant*>::iterator find(const std::wstring& key)
    {
 
-       typedef std::unordered_map<std::wstring, std::unique_ptr<variant>>&             mapRef_t;
-       typedef std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator    mapIt_t;
+       typedef std::unordered_map<std::wstring, variant*>&             mapRef_t;
+       typedef std::unordered_map<std::wstring, variant*>::iterator    mapIt_t;
        bool isFind{false};
 
        std::function<mapIt_t(mapRef_t)> finder = [&key, &finder, &isFind](mapRef_t mRef) -> auto
@@ -390,26 +410,26 @@ class fileContainer
    }
 
 
-   std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator end()
+   std::unordered_map<std::wstring, variant*>::iterator end()
    {
        return container.end();
    }
 
-    std::unordered_map<std::wstring, std::unique_ptr<variant>>::iterator begin()
+    std::unordered_map<std::wstring, variant*>::iterator begin()
     {
        return container.begin();
     }
 
-    std::unordered_map<std::wstring, std::unique_ptr<variant>>& get()
+    std::unordered_map<std::wstring, variant*>& get()
     {
        return container;
     }
 
 private:
-   std::unordered_map<std::wstring, std::unique_ptr<variant>> container;
+   std::unordered_map<std::wstring, variant*> container;
 
 private:
-    void vecExtr(std::unique_ptr<variant>& ptr, std::wstring::iterator& bufIt)
+    void vecExtr(variant* &ptr, std::wstring::iterator& bufIt)
     {
         bool vecHasMake{false};
         std::wstring buf;
@@ -420,7 +440,7 @@ private:
                 if(!vecHasMake)
                 {
                     tag::vecWStr vs;
-                    ptr = std::make_unique<variant>(vs);
+                    ptr = new variant(vs);
                     vecHasMake = true;
                 }
                 ++bufIt;
@@ -438,7 +458,7 @@ private:
                 if(!vecHasMake)
                 {
                     tag::vecInt vi;
-                    ptr = std::make_unique<variant>(vi);
+                    ptr = new variant(vi);
                     vecHasMake = true;
                 }
                 while(*bufIt >= L'0' && *bufIt <= L'9')
@@ -455,14 +475,14 @@ private:
             }
         }
 
-        if(*bufIt == ']' && !vecHasMake)
+        if(!vecHasMake)
         {
-            tag::vecWStr vs;
-            ptr = std::make_unique<variant>(vs);
+            tag::vecWStr vws;
+            ptr = new variant(vws);
         }
     }
 
-    void mapExtr (std::unordered_map<std::wstring, std::unique_ptr<variant>>& container_, std::wstring::iterator& bufIt)
+    void mapExtr (std::unordered_map<std::wstring, variant*>& container_, std::wstring::iterator& bufIt)
     {
         bool isKey{true};
         std::wstring key;
@@ -479,7 +499,7 @@ private:
                 }
                 ++bufIt;
                 key = buf;
-                container_.insert(std::pair<std::wstring, std::unique_ptr<variant>>(key, nullptr));
+                container_.insert(std::pair<std::wstring, variant*>(key, nullptr));
                 buf.clear();
             }
             else if (*bufIt == L'\"' && !isKey)
@@ -492,7 +512,7 @@ private:
                 }
                 ++bufIt;
                 tag::wString ws;
-                container_[key] = std::make_unique<variant>(ws);
+                container_[key] = new variant(ws);
                 container_[key]->dT_.wStr_t = buf;
                 buf.clear();
             }
@@ -503,13 +523,13 @@ private:
                     buf += *bufIt;
                     ++bufIt;
                 }
-                container_[key] = std::make_unique<variant>(std::stoi(buf));
+                container_[key] = new variant(std::stoi(buf));
                 buf.clear();
             }
             else if (*bufIt == L'{')
             {
                 tag::mapWStrVar msv;
-                container_[key] = std::make_unique<variant>(msv);
+                container_[key] = new variant(msv);
                 mapExtr(container_[key]->dT_.mapWStrDif_t, ++bufIt); //;
                 ++bufIt;
             }

@@ -44,8 +44,8 @@ void forms::prodTable_form::setDataPtr(implData* data_)
 
 void forms::prodTable_form::setupUI()
 {
-    std::function<void(std::unordered_map<std::wstring, std::unique_ptr<variant>>&, QObject*)> extractor =
-            [&extractor, this](std::unordered_map<std::wstring, std::unique_ptr<variant>>& map, QObject* parent)
+    std::function<void(std::unordered_map<std::wstring, variant*>&, QObject*)> extractor =
+            [&extractor, this](std::unordered_map<std::wstring, variant*>& map, QObject* parent)
             {
                 for(auto&& it : map)
                 {

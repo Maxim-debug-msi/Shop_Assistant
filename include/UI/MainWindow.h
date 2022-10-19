@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include <QMdiArea>
+#include <QMdiSubWindow>
 #include "product_form.h"
 #include "implementations/implForms.h"
 #include "implementations/implData.h"

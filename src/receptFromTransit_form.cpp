@@ -26,8 +26,8 @@ void forms::receptFromTransit_form::setDataPtr(implData* dataPtr)
 
 void forms::receptFromTransit_form::setupUi()
 {
-    std::function<void(std::unordered_map<std::wstring, std::unique_ptr<variant>>&)> extractor =
-            [&extractor, this](std::unordered_map<std::wstring, std::unique_ptr<variant>>& map)
+    std::function<void(std::unordered_map<std::wstring, variant*>&)> extractor =
+            [&extractor, this](std::unordered_map<std::wstring, variant*>& map)
             {
                 for(auto&& it : map)
                 {

@@ -25,8 +25,8 @@ void forms::prodGroup_editor::setDataPtr(implData* data_)
 
 void forms::prodGroup_editor::setupUI()
 {
-    std::function<void(std::unordered_map<std::wstring, std::unique_ptr<variant>>&, QObject*)> extractor =
-            [&extractor, this](std::unordered_map<std::wstring, std::unique_ptr<variant>>& map, QObject* parent)
+    std::function<void(std::unordered_map<std::wstring, variant*>&, QObject*)> extractor =
+            [&extractor, this](std::unordered_map<std::wstring, variant*>& map, QObject* parent)
             {
                 for(auto&& it : map)
                 {
@@ -85,8 +85,7 @@ void forms::prodGroup_editor::setupUI()
         auto& it = data->prodInfo.prodInfo.find(obj->parent()->objectName().toStdWString())->second;
 
         tag::mapWStrVar mwsv;
-        it->get_map().insert(std::pair<std::wstring, std::unique_ptr<variant>>(textLine->text().toStdWString(),
-                                                                                     std::make_unique<variant>(mwsv)));
+        it->get_map().insert(std::pair<std::wstring, variant*>(textLine->text().toStdWString(), new variant(mwsv)));
     });
 
     QObject::connect(remElem_btn, &QPushButton::clicked, [this](){
