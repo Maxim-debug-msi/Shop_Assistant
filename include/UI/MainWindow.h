@@ -9,8 +9,11 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include "product_form.h"
-#include "implementations/implForms.h"
 #include "implementations/implData.h"
+#include "forms/docJournal_form.h"
+#include "forms/edit_prodGroup_form.h"
+#include "forms/receptFromTransit_form.h"
+#include "forms/addProd_form.h"
 #include "ui_UI.h"
 
 class MainWindow : public QMainWindow
@@ -40,7 +43,8 @@ public slots:
 private:
     Ui::MainWindow* ui;
     implData* p_ImplData;
-    implForms* p_implForms;
+    forms::docJournal_form* docJournal;
+    QMdiSubWindow* dJSubWindow;
 };
 
 #endif //SHOP_ASSISTANT_MAINWINDOW_H

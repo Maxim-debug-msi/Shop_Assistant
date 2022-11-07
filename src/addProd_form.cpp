@@ -25,7 +25,7 @@ forms::addProduct_form::addProduct_form(const std::wstring& docNum, QWidget* par
                            docDate(new QLineEdit(mainWgt)), hl13(new QHBoxLayout(mainWgt)),
                            status(new QLineEdit(mainWgt)), creator(new QLineEdit(mainWgt)), hl9(new QHBoxLayout(mainWgt)),
                            hl8(new QHBoxLayout(mainWgt)), hl10(new QHBoxLayout(mainWgt)), hl11(new QHBoxLayout(mainWgt)),
-                           menu(new QMenu()), summaryEndDate(new QLineEdit(mainWgt)), endDate(new QDateEdit(mainWgt)),
+                           menu(new QMenu()),
                            hl12(new QHBoxLayout), writeProd_btn(new QPushButton(mainWgt)), actions_btn(new QToolButton(mainWgt)),
                            remEnter_act(new QAction("Отмена проведения", mainWgt)), nameBuf(new std::wstring),
                            remDel_act(new QAction("Снять пометку удаления", mainWgt)), hl14(new QHBoxLayout),
@@ -156,14 +156,6 @@ void forms::addProduct_form::setupUI()
     expirationDate->setFixedSize(80, 20);
     expirationDate->setMaximum(std::numeric_limits<int>::max());
 
-    summaryEndDate->setText("Дата окончания срока годности:");
-    summaryEndDate->setFixedSize(250, 20);
-    summaryEndDate->setReadOnly(true);
-    summaryEndDate->setFrame(false);
-    endDate->setFixedSize(100, 20);
-    endDate->setCalendarPopup(true);
-    endDate->setDate(QDate(pTInfo->tm_year + 1900, pTInfo->tm_mon + 1, pTInfo->tm_mday));
-
     summaryComment->setText("Комментарий:");
     summaryComment->setFixedSize(270, 20);
     summaryComment->setReadOnly(true);
@@ -222,8 +214,6 @@ void forms::addProduct_form::setupUI()
     hl6->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     hl6->addWidget(summaryDate);
     hl6->addWidget(expirationDate);
-    hl6->addWidget(summaryEndDate);
-    hl6->addWidget(endDate);
 
     hl12->addWidget(deleteProd_btn);
     hl12->addWidget(writeProd_btn);
@@ -254,27 +244,14 @@ void forms::addProduct_form::setupUI()
     QObject::connect(rPrice, SIGNAL(editingFinished()), this, SLOT(editedForm()));
     QObject::connect(optPrice, SIGNAL(editingFinished()), this, SLOT(editedForm()));
     QObject::connect(expirationDate, SIGNAL(editingFinished()), this, SLOT(editedForm()));
-    QObject::connect(endDate, SIGNAL(editingFinished()), this, SLOT(editedForm()));
     QObject::connect(comment, SIGNAL(editingFinished()), this, SLOT(editedForm()));
 
-    QObject::connect(expirationDate, &QSpinBox::editingFinished, [this]()
+    connect(enterProd_btn, &QPushButton::clicked, [this]()
     {
-        int y{pTInfo->tm_year + 1900};
-        int m{pTInfo->tm_mon + 1};
-        int d{1};
-
-        m += expirationDate->value();
-
-        while(m > 12)
-        {
-            ++y;
-            m -= 12;
-        }
-
-        endDate->setDate(QDate(y, m, d));
+        addProduct();
+        MainWindow::logger("Документ " + QString::fromStdWString(*nameBuf) + " проведён.", log);
+        emit docStatusChange(true);
     });
-
-    connect(enterProd_btn, SIGNAL(clicked()), this, SLOT(addProduct()));
 
     QObject::connect(writeProd_btn, &QPushButton::clicked, [this]()
     {
@@ -293,6 +270,8 @@ void forms::addProduct_form::setupUI()
             blockEdit();
 
             uneditedForm();
+
+            emit docStatusChange(true);
 
             MainWindow::logger("Документ " + QString::fromStdWString(*nameBuf) + " сохранен.", log);
         }
@@ -317,6 +296,9 @@ void forms::addProduct_form::setupUI()
 
         uneditedForm();
 
+        MainWindow::logger("Документ " + QString::fromStdWString(*nameBuf) + " удалён.", log);
+
+        emit docStatusChange(true);
     });
 
     QObject::connect(remEnter_act, &QAction::triggered, this, [this]()
@@ -328,6 +310,8 @@ void forms::addProduct_form::setupUI()
         status->setText("Записан");
 
         blockEdit();
+
+        emit docStatusChange(true);
     });
 
     QObject::connect(remDel_act, &QAction::triggered, this, [this]()
@@ -337,6 +321,8 @@ void forms::addProduct_form::setupUI()
         status->setText("Записан");
 
         blockEdit();
+
+        emit docStatusChange(true);
     });
 }
 
@@ -347,78 +333,69 @@ void forms::addProduct_form::saveDoc()
 
     if(data->addProdDoc.doc.docs.find(creator->text().toStdWString()) == data->addProdDoc.doc.docs.end())
     {
-        data->addProdDoc.doc.docs[L"Документы"]->get_map().insert({creator->text().toStdWString(), nullptr});
-        data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()] = new variant(msv);
+        data->addProdDoc.doc.docs[L"Документы"]->get_map().insert({creator->text().toStdWString(), new variant(msv)});
     }
+    if(data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map().
+    find(std::to_wstring(*time)) == data->addProdDoc.doc.docs.end())
+    {
+        data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map().insert
+        ({std::to_wstring(*time), new variant(msv)});
 
-    data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map().insert({std::to_wstring(*time), nullptr});
-    data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map()[std::to_wstring(*time)] = new variant(msv);
+        auto& map = data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map()[std::to_wstring(*time)]->get_map();
+
+        map.insert({L"дата_ид", new variant(ws)});
+        map.insert({L"Номер", new variant(ws)});
+        map.insert({L"Код", new variant(ws)});
+        map.insert({L"Дата", new variant(ws)});
+        map.insert({L"Группа", new variant(ws)});
+        map.insert({L"EAN", new variant(ws)});
+        map.insert({L"Количество", new variant(ws)});
+        map.insert({L"р_цена", new variant(ws)});
+        map.insert({L"о_цена", new variant(ws)});
+        map.insert({L"СГ", new variant(ws)});
+        //map.insert({L"Окончание СГ", new variant(ws)});
+        map.insert({L"Статус", new variant(ws)});
+        map.insert({L"Автор", new variant(ws)});
+        map.insert({L"Имя", new variant(ws)});
+        map.insert({L"Комментарий", new variant(ws)});
+
+        data->docsPtr[L"Заведение товара"]->docsOfCreator[creator->text().toStdWString()].insert
+                (std::begin(data->docsPtr[L"Заведение товара"]->docsOfCreator[creator->text().toStdWString()]), *time);
+
+        data->docsPtr[L"Заведение товара"]->docsOfDate.insert(std::begin(data->docsPtr[L"Заведение товара"]->docsOfDate), *time);
+    }
 
     auto& map = data->addProdDoc.doc.docs[L"Документы"]->get_map()[creator->text().toStdWString()]->get_map()[std::to_wstring(*time)]->get_map();
 
-    map.insert(std::pair<std::wstring, variant*>(L"дата_ид", nullptr));
-    map[L"дата_ид"] = new variant(ws);
     map[L"дата_ид"]->set_wstring(std::to_wstring(*time));
 
-    map.insert(std::pair<std::wstring, variant*>(L"Номер", nullptr));
-    map[L"Номер"] = new variant(ws);
     map[L"Номер"]->set_wstring(docNum->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Код", nullptr));
-    map[L"Код"] = new variant(ws);
     map[L"Код"]->set_wstring(code->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Дата", nullptr));
-    map[L"Дата"] = new variant(ws);
     map[L"Дата"]->set_wstring(docDate->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Группа", nullptr));
-    map[L"Группа"] = new variant(ws);
     map[L"Группа"]->set_wstring(groupList->currentText().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"EAN", nullptr));
-    map[L"EAN"] = new variant(ws);
     map[L"EAN"]->set_wstring(EANCode->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Количество", nullptr));
-    map[L"Количество"] = new variant(ws);
     map[L"Количество"]->set_wstring(count->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"р_цена", nullptr));
-    map[L"р_цена"] = new variant(ws);
     map[L"р_цена"]->set_wstring(rPrice->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"о_цена", nullptr));
-    map[L"о_цена"] = new variant(ws);
     map[L"о_цена"]->set_wstring(optPrice->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"СГ", nullptr));
-    map[L"СГ"] = new variant(ws);
     map[L"СГ"]->set_wstring(expirationDate->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Окончание СГ", nullptr));
-    map[L"Окончание СГ"] = new variant(ws);
-    map[L"Окончание СГ"]->set_wstring(endDate->text().toStdWString());
+    //map[L"Окончание СГ"]->set_wstring(endDate->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Статус", nullptr));
-    map[L"Статус"] = new variant(ws);
     map[L"Статус"]->set_wstring(status->text().toStdWString());
 
-    map.insert(std::pair<std::wstring, variant*>(L"Автор", nullptr));
-    map[L"Автор"] = new variant(ws);
     map[L"Автор"]->set_wstring(creator->text().toStdWString());
 
-    map.insert({L"Имя", nullptr});
-    map[L"Имя"] = new variant(ws);
     map[L"Имя"]->set_wstring(name->text().toStdWString());
 
-    map.insert({L"Комментарий", new variant(ws)});
     map[L"Комментарий"]->set_wstring(comment->text().toStdWString());
-
-    data->docsPtr[L"Заведение товара"]->docsOfCreator[creator->text().toStdWString()].insert
-    (std::begin(data->docsPtr[L"Заведение товара"]->docsOfCreator[creator->text().toStdWString()]), *time);
-
-    data->docsPtr[L"Заведение товара"]->docsOfDate.insert(std::begin(data->docsPtr[L"Заведение товара"]->docsOfDate), *time);
 }
 
 void forms::addProduct_form::setLog_ptr(QTextBrowser* sM)
@@ -445,7 +422,6 @@ void forms::addProduct_form::blockFieldsEdit(const bool& flag)
     rPrice->setReadOnly(flag);
     optPrice->setReadOnly(flag);
     expirationDate->setReadOnly(flag);
-    endDate->setReadOnly(flag);
     comment->setReadOnly(flag);
 }
 
@@ -482,32 +458,21 @@ void forms::addProduct_form::addProduct()
         data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()] = new variant(msv);
         auto &map = data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()]->get_map();
 
-        map.insert(std::pair<std::wstring, variant*>(L"Группа", nullptr));
-        map[L"Группа"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"Группа", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"EAN", nullptr));
-        map[L"EAN"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"EAN", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"Код", nullptr));
-        map[L"Код"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"Код", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"Имя", nullptr));
-        map[L"Имя"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"Имя", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"Количество", nullptr));
-        map[L"Количество"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"Количество", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"о_цена", nullptr));
-        map[L"о_цена"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"о_цена", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"р_цена", nullptr));
-        map[L"р_цена"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"р_цена", new variant(ws)));
 
-        map.insert(std::pair<std::wstring, variant*>(L"СГ", nullptr));
-        map[L"СГ"] = new variant(ws);
-
-        map.insert(std::pair<std::wstring, variant*>(L"Окончание СГ", nullptr));
-        map[L"Окончание СГ"] = new variant(ws);
+        map.insert(std::pair<std::wstring, variant*>(L"СГ", new variant(ws)));
     }
 
     auto &map = data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()]->get_map();
@@ -528,7 +493,6 @@ void forms::addProduct_form::addProduct()
 
     map[L"СГ"]->set_wstring(expirationDate->text().toStdWString());
 
-    map[L"Окончание СГ"]->set_wstring(endDate->text().toStdWString());
 
     status->setText("Проведён");
 
@@ -638,11 +602,43 @@ void forms::addProduct_form::fillFields(const std::wstring& docNumber_)
         code->setText(QString::fromStdWString(map->second->get_map()[L"Код"]->get_wstring()));
         creator->setText(QString::fromStdWString(map->second->get_map()[L"Автор"]->get_wstring()));
         expirationDate->setValue(std::stoi(map->second->get_map()[L"СГ"]->get_wstring()));
-        endDate->setDate(QDate::fromString(QString::fromStdWString(map->second->get_map()[L"Окончание СГ"]->get_wstring())));
         comment->setText(QString::fromStdWString(map->second->get_map()[L"Комментарий"]->get_wstring()));
 
         blockEdit();
     }
+}
+
+void forms::create_addProdDoc(QMdiArea* mdiArea, implData* data, QTextBrowser *log, QTableWidget* table,
+                                   const std::wstring& docNum, const int& row)
+{
+    auto subWindow = new QMdiSubWindow(mdiArea);
+    auto newAP_f = new forms::addProduct_form(docNum, subWindow);
+
+    subWindow->setWidget(newAP_f->mainWgt);
+    subWindow->setAttribute(Qt::WA_DeleteOnClose);
+
+    newAP_f->setDataPtr(data);
+    newAP_f->setLog_ptr(log);
+    newAP_f->setupUI();
+
+    mdiArea->addSubWindow(subWindow);
+
+    subWindow->show();
+
+    if(table != nullptr)
+    {
+        QObject::connect(newAP_f, &forms::addProduct_form::docStatusChange, [row, docNum, data, table]()
+        {
+            table->item(row, 0)->setIcon(QIcon(QString::fromStdString
+            (data->docStatusIcons[data->docsPtr[L"Заведение товара"]->docs.find(docNum)->second->get_map()[L"Статус"]->get_wstring()])));
+        });
+    }
+
+    QObject::connect(newAP_f->mainWgt, &QWidget::destroyed, [newAP_f, subWindow, mdiArea]()
+    {
+        delete newAP_f;
+        mdiArea->removeSubWindow(subWindow);
+    });
 }
 
 

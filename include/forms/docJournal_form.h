@@ -27,7 +27,7 @@ namespace forms {
     Q_OBJECT
 
     public:
-        docJournal_form();
+        docJournal_form(QWidget* parent = nullptr);
 
         ~docJournal_form() override;
 
@@ -42,13 +42,13 @@ namespace forms {
     public slots:
         void drawTable();
 
-        void openDoc(const std::wstring&);
+        void openDoc(const std::wstring&, int&);
 
     public:
         QWidget *mainWgt;
 
     private:
-        std::map<std::wstring, QTableWidget*> tables;
+        QTableWidget* table;
         QWidget* tableWgt;
 
         QLineEdit *summaryDL;
@@ -79,9 +79,6 @@ namespace forms {
         implData *data;
         models::objectTree_model *oT_model;
         QTextBrowser *log;
-        std::map<std::wstring, std::string> iconsPaths{{L"Записан", "C:/Users/Maxim/CLionProjects/shop_assistant/icons/writeDocIcon.png"},
-                                                       {L"Проведён", "C:/Users/Maxim/CLionProjects/shop_assistant/icons/enterDocIcon.png"},
-                                                       {L"Удалён", "C:/Users/Maxim/CLionProjects/shop_assistant/icons/delDocIcon.png"}};
     };
 }
 #endif //SHOP_ASSISTANT_DOCJOURNAL_FORM_H

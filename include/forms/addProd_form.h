@@ -16,6 +16,8 @@
 #include <QToolButton>
 #include <QMenu>
 #include <QCloseEvent>
+#include <QMdiArea>
+#include <QTableWidget>
 #include <ctime>
 #include "implementations/implData.h"
 #include "data/Data.h"
@@ -25,7 +27,7 @@ namespace forms {
     Q_OBJECT
 
     public:
-        addProduct_form(const std::wstring& docNum = L"", QWidget* parent = nullptr);
+        explicit addProduct_form(const std::wstring& docNum = L"", QWidget* parent = nullptr);
 
         ~addProduct_form() override;
 
@@ -34,6 +36,9 @@ namespace forms {
         void setDataPtr(implData*);
 
         void setLog_ptr(QTextBrowser*);
+
+    signals:
+        void docStatusChange(bool);
 
     private:
         void saveDoc();
@@ -88,9 +93,6 @@ namespace forms {
         QSpinBox *expirationDate;
         QLineEdit* summaryDate;
 
-        QLineEdit* summaryEndDate;
-        QDateEdit* endDate;
-
         QLineEdit* summaryComment;
         QLineEdit* comment;
 
@@ -136,5 +138,8 @@ namespace forms {
                                               {L"Проведён", 1},
                                               {L"Удалён", 2}};
     };
+
+    void create_addProdDoc(QMdiArea*, implData*, QTextBrowser* log, QTableWidget* = nullptr,
+                           const std::wstring& = L"", const int& = 0);
 }
 #endif //SHOP_ASSISTANT_ADDPROD_FORM_H
