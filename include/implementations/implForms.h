@@ -5,11 +5,11 @@
 #ifndef SHOP_ASSISTANT_IMPLFORMS_H
 #define SHOP_ASSISTANT_IMPLFORMS_H
 
-#include "forms/product_form.h"
-#include "forms/edit_prodGroup_form.h"
-#include "forms/receptFromTransit_form.h"
+#include "forms/prodTable.h"
+#include "forms/editProdGroup.h"
+#include "forms/receptFromTransit.h"
 #include "forms/addProd_form.h"
-#include "forms/docJournal_form.h"
+#include "forms/docJournal.h"
 
 struct implForms
 {

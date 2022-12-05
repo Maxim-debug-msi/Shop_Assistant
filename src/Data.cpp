@@ -19,21 +19,21 @@ void dataContain::prodInfo::upload(const std::string& filePath)
 {
     prodInfo.fread(filePath);
 
-    if(prodInfo.find(L"Код") == prodInfo.end())
+    if(prodInfo.search(L"Код") == prodInfo.end())
     {
         tag::wString ws;
-        prodInfo.get().insert(std::pair<std::wstring, variant*>(L"Код", new variant(ws)));
+        prodInfo.insert(std::pair<std::wstring, variant*>(L"Код", new variant(ws)));
         prodInfo[L"Код"]->set_wstring(L"000001");
     }
-    if(prodInfo.find(L"РезервныйКод") == prodInfo.end())
+    if(prodInfo.search(L"РезервныйКод") == prodInfo.end())
     {
         tag::vecWStr vws;
-        prodInfo.get().insert(std::pair<std::wstring, variant*>(L"РезервныйКод", new variant(vws)));
+        prodInfo.insert(std::pair<std::wstring, variant*>(L"РезервныйКод", new variant(vws)));
     }
-    if(prodInfo.find(L"Группы") == prodInfo.end())
+    if(prodInfo.search(L"Группы") == prodInfo.end())
     {
         tag::mapWStrVar mwsv;
-        prodInfo.get().insert(std::pair<std::wstring, variant*>(L"Группы", new variant(mwsv)));
+        prodInfo.insert(std::pair<std::wstring, variant*>(L"Группы", new variant(mwsv)));
         prodInfo[L"Группы"]->get_map().insert(std::pair<std::wstring, variant*>(L"Товары", new variant(mwsv)));
     }
 }
@@ -47,15 +47,15 @@ void dataContain::addProd_doc::upload(const std::string& filePath, std::map<std:
 {
     doc.docs.fread(filePath);
 
-    if(doc.docs.find(L"Документы") == doc.docs.end())
+    if(doc.docs.search(L"Документы") == doc.docs.end())
     {
         tag::mapWStrVar mws;
-        doc.docs.get().insert(std::pair<std::wstring, variant*>(L"Документы", new variant(mws)));
+        doc.docs.insert(std::pair<std::wstring, variant*>(L"Документы", new variant(mws)));
     }
-    if(doc.docs.find(L"Номер") == doc.docs.end())
+    if(doc.docs.search(L"Номер") == doc.docs.end())
     {
         tag::wString ws;
-        doc.docs.get().insert(std::pair<std::wstring, variant*>(L"Номер", new variant(ws)));
+        doc.docs.insert(std::pair<std::wstring, variant*>(L"Номер", new variant(ws)));
         doc.docs[L"Номер"]->set_wstring(L"000001");
     }
 
@@ -100,48 +100,4 @@ void dataContain::docInfo::save(const std::string& filePath)
     docInfo.fwrite(filePath);
 }
 
-std::wstring dataContain::w_asctime(std::tm* pTInfo)
-{
-    std::wstring buf;
-
-    if(pTInfo->tm_mday < 10)
-    {
-        buf += L"0";
-    }
-
-    buf += std::to_wstring(pTInfo->tm_mday);
-    buf += L".";
-
-    if(pTInfo->tm_mon < 9)
-    {
-        buf += L"0";
-    }
-
-    buf += std::to_wstring(pTInfo->tm_mon + 1);
-    buf += L".";
-    buf += std::to_wstring(1900 + pTInfo->tm_year);
-    buf += L" ";
-
-    if(pTInfo->tm_hour < 10)
-    {
-        buf += L"0";
-    }
-    buf += std::to_wstring(pTInfo->tm_hour);
-    buf += L":";
-
-    if(pTInfo->tm_min < 10)
-    {
-        buf += L"0";
-    }
-    buf += std::to_wstring(pTInfo->tm_min);
-    buf += L":";
-
-    if(pTInfo->tm_sec < 10)
-    {
-        buf += L"0";
-    }
-    buf += std::to_wstring(pTInfo->tm_sec);
-
-    return buf;
-}
 

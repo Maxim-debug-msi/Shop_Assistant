@@ -3,6 +3,7 @@
 //
 
 #include "models/objectTree_model.h"
+#include <iostream>
 
 #include <utility>
 

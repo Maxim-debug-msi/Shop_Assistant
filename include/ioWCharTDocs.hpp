@@ -383,32 +383,105 @@ class fileContainer
        return container[key];
    }
 
-   std::unordered_map<std::wstring, variant*>::iterator find(const std::wstring& key)
+   std::unordered_map<std::wstring, variant*>::iterator search(const std::wstring& key)
    {
 
        typedef std::unordered_map<std::wstring, variant*>&             mapRef_t;
        typedef std::unordered_map<std::wstring, variant*>::iterator    mapIt_t;
-       bool isFind{false};
 
-       std::function<mapIt_t(mapRef_t)> finder = [&key, &finder, &isFind](mapRef_t mRef) -> auto
+       std::unordered_map<std::wstring, variant*>::iterator result;
+       bool isFind{false};
+/*
+       size_t       idx{0};
+
+       std::vector<std::unordered_map<std::wstring, variant*>*> mapPtr;
+       std::vector<std::unordered_map<std::wstring, variant*>::iterator> it;
+       std::vector<std::unordered_map<std::wstring, variant*>::iterator> end;
+
+       mapPtr.push_back(&container);
+       it.push_back(container.begin());
+       end.push_back(container.end());
+
+       while(it[0] != end[0])
        {
-           mapIt_t findIt{mRef.find(key)};
-           if(findIt != mRef.end())
+           it[idx] = mapPtr[idx]->find(key);
+           if(it[idx] != end[idx])
            {
-               isFind = true;
-               return findIt;
+               return it[idx];
+           }
+           else
+           {
+               for(auto&& map : *mapPtr[idx])
+               {
+                   if(map.second->is_map() && !map.second->is_empty_map())
+                   {
+                       mapPtr.push_back(&map.second->get_map());
+                       ++idx;
+                   }
+               }
            }
 
-           for(auto&& it : mRef)
+           if(it[idx]->second->is_map() && !it[idx]->second->is_empty_map())
            {
-               if(it.second->is_map()) return finder(it.second->get_map());
-               if(isFind) break;
+               it.push_back(it[idx]->second->get_map().begin());
+               end.push_back(it[idx]->second->get_map().end());
+               ++idx;
+           }
+
+           if(it[idx] == end[idx])
+           {
+               it.pop_back();
+               end.pop_back();
+               --idx;
+               ++it[idx];
+           }
+           else
+           {
+               ++it[idx];
+           }
+       }
+
+       return container.end();
+*/
+
+       std::function<void(mapRef_t)> finder = [&key, &finder, &isFind, &result](mapRef_t mRef) -> auto
+       {
+           if(isFind)
+           {
+               return;
+           }
+           else
+           {
+               mapIt_t findIt{mRef.find(key)};
+               if (findIt != mRef.end())
+               {
+                   result = findIt;
+                   isFind = true;
+               }
+               else
+               {
+                   for (auto &&it: mRef)
+                   {
+                       if (it.second->is_map() && !isFind)
+                       {
+                           finder(it.second->get_map());
+                       }
+                       else if(isFind) return;
+                   }
+               }
            }
        };
 
-       return finder(container);
+       finder(container);
+
+       if(isFind) return result;
+       else return container.end();
    }
 
+   void insert(const std::pair<std::wstring, variant*>& pair)
+   {
+       container.insert(pair);
+   }
 
    std::unordered_map<std::wstring, variant*>::iterator end()
    {
@@ -420,9 +493,9 @@ class fileContainer
        return container.begin();
     }
 
-    std::unordered_map<std::wstring, variant*>& get()
+    void erase(const std::wstring& key)
     {
-       return container;
+       container.erase(key);
     }
 
 private:

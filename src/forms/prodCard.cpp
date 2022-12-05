@@ -2,36 +2,25 @@
 // Created by Maxim on 31.10.2022.
 //
 
-#include "prod_card.h"
+#include "prodCard.h"
 
-forms::prod_card::prod_card(implData *data_, QTextBrowser * log_, QWidget *parent, const std::wstring& prodCode) :
-                            mainWgt(new QWidget(parent)),
-                            QObject(nullptr), productCode(new std::wstring(prodCode)), hl(new QHBoxLayout(mainWgt)),
-                            data(data_), log(log_), d_group(new QLineEdit(mainWgt)), group(new QComboBox(mainWgt)),
-                            d_code(new QLineEdit(mainWgt)), code(new QLineEdit(mainWgt)), d_name(new QLineEdit(mainWgt)),
-                            name(new QLineEdit(mainWgt)), d_printName(new QLineEdit(mainWgt)), printName(new QLineEdit(mainWgt)),
-                            d_barCode(new QLineEdit(mainWgt)), barCode(new QLineEdit(mainWgt)), d_oPrice(new QLineEdit(mainWgt)),
-                            oPrice(new QDoubleSpinBox(mainWgt)), d_rPrice(new QLineEdit(mainWgt)), rPrice(new QDoubleSpinBox(mainWgt)),
-                            d_expDate(new QLineEdit(mainWgt)), expDate(new QSpinBox(mainWgt)), actions_btn(new QToolButton(mainWgt)),
-                            actions(new QMenu(actions_btn)), saveProduct(new QAction("Завести товар", actions)),
-                            deleteProduct(new QAction("Удалить товар", actions)), editProduct(new QAction("Редактировать")),
-                            vl(new QVBoxLayout(mainWgt)), hl0(new QHBoxLayout(mainWgt)), hl1(new QHBoxLayout(mainWgt)),
-                            hl2(new QHBoxLayout(mainWgt)), hl3(new QHBoxLayout(mainWgt)), hl4(new QHBoxLayout(mainWgt)),
-                            hl5(new QHBoxLayout(mainWgt)), hl6(new QHBoxLayout(mainWgt)), hl7(new QHBoxLayout(mainWgt)),
-                            oT_model(new models::objectTree_model(group)), formStatus(nullptr), rootModelObj(new QObject(mainWgt)){}
+form::prodCard::prodCard(implData *data_, QTextBrowser * log_, QWidget *parent, std::wstring  prodCode, std::wstring  prodGroup) :
+                            productGroup{std::move(prodGroup)},
+                            QWidget(parent), productCode{std::move(prodCode)}, hl(new QHBoxLayout(this)),
+                            data(data_), log(log_), d_group(new QLineEdit(this)), group(new QComboBox(this)),
+                            d_code(new QLineEdit(this)), code(new QLineEdit(this)), d_name(new QLineEdit(this)),
+                            name(new QLineEdit(this)), d_printName(new QLineEdit(this)), printName(new QLineEdit(this)),
+                            d_barCode(new QLineEdit(this)), barCode(new QLineEdit(this)), d_oPrice(new QLineEdit(this)),
+                            oPrice(new QDoubleSpinBox(this)), d_rPrice(new QLineEdit(this)), rPrice(new QDoubleSpinBox(this)),
+                            d_expDate(new QLineEdit(this)), expDate(new QSpinBox(this)), actions_btn(new QToolButton(this)),
+                            actions(new QMenu(actions_btn)), saveProduct(new QAction("Сохранить", actions)),
+                            deleteProduct(new QAction("Удалить", actions)), editProduct(new QAction("Редактировать")),
+                            vl(new QVBoxLayout(this)), hl0(new QHBoxLayout(this)), hl1(new QHBoxLayout(this)),
+                            hl2(new QHBoxLayout(this)), hl3(new QHBoxLayout(this)), hl4(new QHBoxLayout(this)),
+                            hl5(new QHBoxLayout(this)), hl6(new QHBoxLayout(this)), hl7(new QHBoxLayout(this)),
+                            oT_model(new models::objectTree_model(group)), rootModelObj(new QObject(this)){}
 
-forms::prod_card::~prod_card()
-{
-    if(*formStatus == 0)
-    {
-        data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().push_back(code->text().toStdWString());
-    }
-    delete oT_model;
-    delete productCode;
-    delete formStatus;
-}
-
-void forms::prod_card::setupUI()
+void form::prodCard::setupUI()
 {
     std::function<void(std::unordered_map<std::wstring, variant*>&)> extractor =
             [&extractor, this](std::unordered_map<std::wstring, variant*>& map)
@@ -54,7 +43,7 @@ void forms::prod_card::setupUI()
     cols << "objectName";
     oT_model->setColumns(cols);
 
-    extractor(data->prodInfo.prodInfo.get()[L"Группы"]->get_map());
+    extractor(data->prodInfo.prodInfo[L"Группы"]->get_map());
 
     group->setModel(oT_model);
 
@@ -174,20 +163,31 @@ void forms::prod_card::setupUI()
     vl->addLayout(hl6);
     vl->addLayout(hl7);
 
-    mainWgt->setLayout(vl);
+    this->setLayout(vl);
 
     fillFields();
+
+    oldGroup = group->currentText().toStdWString();
 
     QObject::connect(saveProduct, &QAction::triggered, [this](){saveProduct_s();});
     QObject::connect(deleteProduct, &QAction::triggered, [this](){deleteProduct_s();});
     QObject::connect(editProduct, &QAction::triggered, [this](){editProduct_s();});
+
+    QObject::connect(group, &QComboBox::editTextChanged, this, &form::prodCard::formEdited_s);
+    QObject::connect(code, &QLineEdit::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(name, &QLineEdit::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(printName, &QLineEdit::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(barCode, &QLineEdit::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(oPrice, &QDoubleSpinBox::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(rPrice, &QDoubleSpinBox::editingFinished, this, &form::prodCard::formEdited_s);
+    QObject::connect(expDate, &QSpinBox::editingFinished, this, &form::prodCard::formEdited_s);
 }
 
-void forms::prod_card::fillFields()
+void form::prodCard::fillFields()
 {
-    if(productCode->empty())
+    if(productCode.empty())
     {
-        formStatus = new int{3};
+        formStatus = 3;
         if(data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().empty())
         {
             code->setText(QString::fromStdWString(data->prodInfo.prodInfo[L"Код"]->get_wstring()));
@@ -199,16 +199,17 @@ void forms::prod_card::fillFields()
             data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().pop_back();
         }
 
-        mainWgt->setWindowTitle("Карточка товара(новый) ");
+        this->setWindowTitle("Карточка товара(новый) ");
     }
     else
     {
-        formStatus = new int{1};
-        auto prodMap = data->prodContain.products.find(*productCode)->second->get_map();
+        formStatus = 1;
 
-        mainWgt->setWindowTitle("Карточка товара ");
+        auto& prodMap = data->prodContain.products[productGroup]->get_map()[productCode]->get_map();
 
-        group->findText(QString::fromStdWString(prodMap[L"группа"]->get_wstring()));
+        this->setWindowTitle("Карточка товара ");
+
+        group->setCurrentText(QString::fromStdWString(prodMap[L"группа"]->get_wstring()));
         code->setText(QString::fromStdWString(prodMap[L"код"]->get_wstring()));
         name->setText(QString::fromStdWString(prodMap[L"имя"]->get_wstring()));
         printName->setText(QString::fromStdWString(prodMap[L"имя_печать"]->get_wstring()));
@@ -221,9 +222,9 @@ void forms::prod_card::fillFields()
     blockEdit();
 }
 
-void forms::prod_card::blockEdit()
+void form::prodCard::blockEdit()
 {
-    switch(*formStatus)
+    switch(formStatus)
     {
         case 0:
         {
@@ -280,11 +281,16 @@ void forms::prod_card::blockEdit()
     }
 }
 
-void forms::prod_card::saveProduct_s()
+void form::prodCard::saveProduct_s()
 {
-    if(*formStatus == 3)
+    if(formStatus == 3)
     {
         data->prodInfo.prodInfo[L"Код"]->incWStr();
+    }
+    else if(formStatus == 2)
+    {
+        code->setText(QString::fromStdWString(data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().back()));
+        data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().pop_back();
     }
 
     std::wstring key = group->currentText().toStdWString();
@@ -292,15 +298,15 @@ void forms::prod_card::saveProduct_s()
     tag::mapWStrVar msv;
     tag::wString ws;
 
-    if (data->prodContain.products.find(key) == data->prodContain.products.end())
+    if (data->prodContain.products.search(key) == data->prodContain.products.end())
     {
-        data->prodContain.products.get()[key] = new variant(msv);
+        data->prodContain.products.insert({key, new variant(msv)});
     }
 
-    if (data->prodContain.products.find(code->text().toStdWString()) == data->prodContain.products.end())
+    if (data->prodContain.products.search(code->text().toStdWString()) == data->prodContain.products.end())
     {
-        data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()] = new variant(msv);
-        auto &map = data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()]->get_map();
+        data->prodContain.products[key]->get_map()[code->text().toStdWString()] = new variant(msv);
+        auto &map = data->prodContain.products[key]->get_map()[code->text().toStdWString()]->get_map();
 
         map.insert(std::pair<std::wstring, variant*>(L"группа", new variant(ws)));
         map.insert(std::pair<std::wstring, variant*>(L"код", new variant(ws)));
@@ -313,7 +319,7 @@ void forms::prod_card::saveProduct_s()
         map.insert(std::pair<std::wstring, variant*>(L"количество", new variant(ws)));
     }
 
-    auto &map = data->prodContain.products.get()[key]->get_map()[code->text().toStdWString()]->get_map();
+    auto &map = data->prodContain.products[key]->get_map()[code->text().toStdWString()]->get_map();
 
     map[L"группа"]->set_wstring(group->currentText().toStdWString());
     map[L"код"]->set_wstring(code->text().toStdWString());
@@ -325,45 +331,77 @@ void forms::prod_card::saveProduct_s()
     map[L"сг"]->set_wstring(std::to_wstring(expDate->value()));
     map[L"количество"]->set_wstring(L"0");
 
-    *formStatus = 1;
+    formStatus = 1;
 
     blockEdit();
 
-    data->prodContain.save("../../bin/products.json");
+    saveChanges("");
 
-    MainWindow::logger("Товар " + code->text() + " " + name->text() + " заведён", log);
+    utl::logger("Товар " + code->text() + " " + name->text() + " сохранён", log);
 
-    emit productAdded(group->currentText().toStdWString(), code->text().toStdWString());
-}
+    emit productsChanged(group->currentText().toStdWString());
 
-void forms::prod_card::deleteProduct_s()
-{
-    if(data->prodContain.products.find(code->text().toStdWString()) != data->prodContain.products.end())
+    if(oldGroup != group->currentText().toStdWString())
     {
-        data->prodContain.products[group->currentText().toStdWString()]->get_map().erase(code->text().toStdWString());
+        emit productsChanged(oldGroup);
+        oldGroup = group->currentText().toStdWString();
     }
 
-    *formStatus = 2;
-
-    blockEdit();
-
-    MainWindow::logger("Товар " + code->text() + " " + name->text() + " удален", log);
+    formSaved_s();
 }
 
-void forms::prod_card::editProduct_s()
+void form::prodCard::deleteProduct_s()
 {
-    *formStatus = 0;
+    if(data->prodContain.products.search(code->text().toStdWString()) != data->prodContain.products.end())
+    {
+        data->prodContain.products[oldGroup]->get_map().erase(code->text().toStdWString());
+    }
+
+    data->prodInfo.prodInfo[L"РезервныйКод"]->get_vector().push_back(code->text().toStdWString());
+
+    formStatus = 2;
+
+    blockEdit();
+
+    utl::logger("Товар " + code->text() + " " + name->text() + " удален", log);
+
+    emit productsChanged(oldGroup);
+
+    formSaved_s();
+
+    saveChanges("");
+}
+
+void form::prodCard::editProduct_s()
+{
+    formStatus = 0;
 
     blockEdit();
 }
 
-void forms::make_productCard(QMdiArea* mdiArea, implData* data, QTextBrowser *log,
-                             std::map<std::wstring, QTableWidget*>* tables, const std::wstring& code)
+void form::prodCard::formEdited_s()
+{
+    this->windowTitle().back() = '*';
+}
+
+void form::prodCard::formSaved_s()
+{
+    this->windowTitle().back() = ' ';
+}
+
+void form::prodCard::saveChanges(const std::string& filePath)
+{
+    data->prodContain.save("../../data/products/products.json");
+    data->prodInfo.save("../../data/products/prodInfo.json");
+}
+
+form::prodCard* form::make_productCard(QMdiArea* mdiArea, implData* data, QTextBrowser *log, const std::wstring& code,
+                                       const std::wstring& group_)
 {
     auto subWindow = new QMdiSubWindow(mdiArea);
-    auto pC_f = new forms::prod_card(data, log, subWindow, code);
+    auto pC_f = new form::prodCard(data, log, subWindow, code, group_);
 
-    subWindow->setWidget(pC_f->mainWgt);
+    subWindow->setWidget(pC_f);
     subWindow->setAttribute(Qt::WA_DeleteOnClose);
 
     pC_f->setupUI();
@@ -372,39 +410,12 @@ void forms::make_productCard(QMdiArea* mdiArea, implData* data, QTextBrowser *lo
 
     subWindow->show();
 
-    if(tables != nullptr)
+    QObject::connect(pC_f, &QWidget::destroyed, [subWindow, mdiArea]()
     {
-        QObject::connect(pC_f, &forms::prod_card::productAdded, [tables, data](const std::wstring& group, const std::wstring& code)
-        {
-            tables->operator[](group)->setRowCount(tables->operator[](group)->rowCount() + 1);
-
-            int row = tables->operator[](group)->rowCount() - 1;
-            auto& product = data->prodContain.products[group]->get_map()[code]->get_map();
-
-            tables->operator[](group)->setItem(row, 0, new QTableWidgetItem(QString::fromStdWString(product[L"код"]->get_wstring())));
-            tables->operator[](group)->item(row, 0)->setFlags(tables->operator[](group)->item(row, 0)->flags() ^ Qt::ItemIsEditable);
-
-            tables->operator[](group)->setItem(row, 1, new QTableWidgetItem(QString::fromStdWString(product[L"имя"]->get_wstring())));
-            tables->operator[](group)->item(row, 1)->setFlags(tables->operator[](group)->item(row, 1)->flags() ^ Qt::ItemIsEditable);
-
-            tables->operator[](group)->setItem(row, 2, new QTableWidgetItem(QString::fromStdWString(product[L"количество"]->get_wstring())));
-            tables->operator[](group)->item(row, 2)->setFlags(tables->operator[](group)->item(row, 2)->flags() ^ Qt::ItemIsEditable);
-
-            tables->operator[](group)->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString(product[L"р_цена"]->get_wstring())));
-            tables->operator[](group)->item(row, 3)->setFlags(tables->operator[](group)->item(row, 3)->flags() ^ Qt::ItemIsEditable);
-        });
-
-        QObject::connect(pC_f, &forms::prod_card::productDeleted, [tables, data](const std::wstring& group, const std::wstring& code)
-        {
-            data->prodContain.products[group]->get_map().erase(code);
-            tables->operator[](group)->findItems(QString::fromStdWString(code), QFlags<Qt::MatchFlag>()).first();
-        });
-    }
-
-    QObject::connect(pC_f->mainWgt, &QWidget::destroyed, [pC_f, subWindow, mdiArea]()
-    {
-        delete pC_f;
+        //delete pC_f;
         mdiArea->removeSubWindow(subWindow);
         subWindow->deleteLater();
     });
+
+    return pC_f;
 }

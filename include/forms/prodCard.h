@@ -2,8 +2,8 @@
 // Created by Maxim on 31.10.2022.
 //
 
-#ifndef SHOP_ASSISTANT_PROD_CARD_H
-#define SHOP_ASSISTANT_PROD_CARD_H
+#ifndef SHOP_ASSISTANT_PRODCARD_H
+#define SHOP_ASSISTANT_PRODCARD_H
 
 #include <QObject>
 #include <QLineEdit>
@@ -19,38 +19,41 @@
 #include <QMdiArea>
 #include <QTableWidget>
 #include <QMdiSubWindow>
-#include "UI/MainWindow.h"
-#include <ctime>
+#include <utility>
 #include "implementations/implData.h"
+#include <ctime>
 #include "data/Data.h"
+#include "utilities.h"
 
-namespace forms
+namespace form
 {
-class prod_card : public QObject
+
+class prodCard : public QWidget
 {
     Q_OBJECT
 
 public:
-    prod_card(implData*, QTextBrowser*, QWidget* parent = nullptr, const std::wstring& prodCode = L"");
-    ~prod_card() override;
+    prodCard(implData*, QTextBrowser*, QWidget* parent = nullptr, std::wstring  prodCode = L"",
+             std::wstring  prodGroup = L"");
+
+    ~prodCard() override = default;
 
     void setupUI();
 
 signals:
-    void productAdded(const std::wstring& group, const std::wstring& code);
-    void productDeleted(const std::wstring& group, const std::wstring& code);
+    void productsChanged(const std::wstring& group);
 
 private:
     void fillFields();
     void blockEdit();
+    void saveChanges(const std::string&);
 
 private slots:
     void saveProduct_s();
     void deleteProduct_s();
     void editProduct_s();
-
-public:
-    QWidget* mainWgt;
+    void formEdited_s();
+    void formSaved_s();
 
 private:
     QLineEdit* d_group;
@@ -101,18 +104,13 @@ private:
     implData* data;
     models::objectTree_model* oT_model;
     QTextBrowser* log;
-    std::wstring* productCode;
-    int* formStatus; // 0-edit, 1-enter, 2-delete, 3-new
-    bool formEdited{false};
-
-    std::map<std::wstring, int> docStatusNum{{L"edit", 0},
-                                             {L"enter", 1},
-                                             {L"delete", 2},
-                                             {L"new", 3}};
+    std::wstring productCode;
+    std::wstring productGroup;
+    std::wstring oldGroup;
+    int formStatus{3}; // 0-edit, 1-enter, 2-delete, 3-new
 };
 
-void make_productCard(QMdiArea*, implData*, QTextBrowser*, std::map<std::wstring, QTableWidget*>* prodTables = nullptr,
-                      const std::wstring& code_ = L"");
+prodCard* make_productCard(QMdiArea*, implData*, QTextBrowser*, const std::wstring& code_ = L"", const std::wstring& group_ = L"");
 }
 
-#endif //SHOP_ASSISTANT_PROD_CARD_H
+#endif //SHOP_ASSISTANT_PRODCARD_H

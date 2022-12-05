@@ -2,8 +2,8 @@
 // Created by Maxim on 25.09.2022.
 //
 
-#ifndef SHOP_ASSISTANT_DOCJOURNAL_FORM_H
-#define SHOP_ASSISTANT_DOCJOURNAL_FORM_H
+#ifndef SHOP_ASSISTANT_DOCJOURNAL_H
+#define SHOP_ASSISTANT_DOCJOURNAL_H
 
 #include <QObject>
 #include <QLayout>
@@ -22,14 +22,14 @@
 #include "implementations/implData.h"
 #include "data/Data.h"
 
-namespace forms {
-    class docJournal_form : QObject {
+namespace form {
+    class docJournal : QObject {
     Q_OBJECT
 
     public:
-        docJournal_form(QWidget* parent = nullptr);
+        docJournal(QWidget* parent = nullptr);
 
-        ~docJournal_form() override;
+        ~docJournal() override;
 
         void setupUI();
 
@@ -43,6 +43,9 @@ namespace forms {
         void drawTable();
 
         void openDoc(const std::wstring&, int&);
+
+    private:
+        implData* getData_ptr();
 
     public:
         QWidget *mainWgt;
@@ -81,4 +84,4 @@ namespace forms {
         QTextBrowser *log;
     };
 }
-#endif //SHOP_ASSISTANT_DOCJOURNAL_FORM_H
+#endif //SHOP_ASSISTANT_DOCJOURNAL_H

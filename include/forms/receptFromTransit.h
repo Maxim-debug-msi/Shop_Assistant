@@ -2,8 +2,8 @@
 // Created by Maxim on 02.09.2022.
 //
 
-#ifndef SHOP_ASSISTANT_RECEPTFROMTRANSIT_FORM_H
-#define SHOP_ASSISTANT_RECEPTFROMTRANSIT_FORM_H
+#ifndef SHOP_ASSISTANT_RECEPTFROMTRANSIT_H
+#define SHOP_ASSISTANT_RECEPTFROMTRANSIT_H
 #include <QObject>
 #include <QLayout>
 #include <QTableWidget>
@@ -16,16 +16,16 @@
 #include "implementations/implData.h"
 #include "models/objectTree_model.h"
 
-namespace forms
+namespace form
 {
-    class receptFromTransit_form : QObject
+    class receptFromTransit : QObject
     {
         Q_OBJECT
 
     public:
-        receptFromTransit_form();
+        receptFromTransit();
 
-        ~receptFromTransit_form() override;
+        ~receptFromTransit() override;
 
         void setDataPtr(implData*);
 
@@ -58,4 +58,4 @@ namespace forms
         std::wstring nameOfCreator;
     };
 }
-#endif //SHOP_ASSISTANT_RECEPTFROMTRANSIT_FORM_H
+#endif //SHOP_ASSISTANT_RECEPTFROMTRANSIT_H

@@ -8,13 +8,12 @@
 #include <QMainWindow>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include "product_form.h"
 #include "implementations/implData.h"
-#include "forms/docJournal_form.h"
-#include "forms/edit_prodGroup_form.h"
-#include "forms/receptFromTransit_form.h"
-#include "forms/addProd_form.h"
 #include "ui_UI.h"
+#include "forms/docJournal.h"
+#include "forms/prodTable.h"
+#include "forms/editProdGroup.h"
+#include "forms/receptFromTransit.h"
 
 class MainWindow : public QMainWindow
 {
@@ -38,12 +37,10 @@ public slots:
 
     void create_docJournal();
 
-    static void logger(const QString& message, QTextBrowser*);
-
 private:
     Ui::MainWindow* ui;
     implData* p_ImplData;
-    forms::docJournal_form* docJournal;
+    form::docJournal* docJournal;
     QMdiSubWindow* dJSubWindow;
 };
 

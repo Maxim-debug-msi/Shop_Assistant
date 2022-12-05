@@ -7,17 +7,25 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "C:/Users/Maxim/Desktop/Programming/Qt/5.15.2/mingw81_64/lib/cmake")
-set(SOURCES main.cpp ../include/UI/UI.ui MainWindow.cpp product_form.cpp objectTree_model.cpp Data.cpp
-        edit_prodGroup_form.cpp receptFromTransit_form.cpp addProd_form.cpp docJournal_form.cpp forms/prod_card.cpp)
-set(LIBS ../include/UI/MainWindow.h ../include/models/objectTree_model.h ../include/forms/product_form.h
-        ../include/forms/edit_prodGroup_form.h ../include/forms/receptFromTransit_form.h ../include/forms/addProd_form.h
-        ../include/forms/docJournal_form.h ../include/forms/prod_card.h)
+
+set(SOURCES main.cpp ../include/UI/UI.ui MainWindow.cpp forms/prodTable.cpp objectTree_model.cpp Data.cpp
+        editProdGroup.cpp receptFromTransit.cpp forms/docJournal.cpp forms/prodCard.cpp
+        forms/dialWindow_str.cpp utilities.cpp forms/dialWindow_del.cpp forms/termoPrint.cpp stb_image_write.cpp)
+set(LIBS ../include/UI/MainWindow.h ../include/models/objectTree_model.h ../include/forms/prodTable.h
+        ../include/forms/editProdGroup.h ../include/forms/receptFromTransit.h
+        ../include/forms/docJournal.h ../include/forms/prodCard.h ../include/utilities.h
+        ../include/forms/dialWindow_str.h ../include/forms/dialWindow_del.h ../include/forms/termoPrint.h
+        ../include/stb_image_write.h)
+
+add_subdirectory(barcodeGen)
 
 find_package(Qt5 COMPONENTS
         Core
         Gui
         Widgets
-        REQUIRED)
+        PrintSupport
+        REQUIRED
+        )
 
 add_executable(shop_assistant ${SOURCES} ${LIBS})
 
@@ -25,6 +33,8 @@ target_link_libraries(shop_assistant
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
+        Qt5::PrintSupport
+        ZXing
         )
 
 if (WIN32)
@@ -44,8 +54,21 @@ if (WIN32)
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                "${QT_INSTALL_PATH}/plugins/platforms/qminimal${DEBUG_SUFFIX}.dll"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
-    foreach (QT_LIB Core Gui Widgets)
+    if(EXISTS "${QT_INSTALL_PATH}/plugins/printsupport/windowsprintersupport${DEBUG_SUFFIX}.dll")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/printsupport/")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                "${QT_INSTALL_PATH}/plugins/printsupport/windowsprintersupport${DEBUG_SUFFIX}.dll"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/printsupport/")
+    endif()
+    foreach (QT_LIB Core Gui Widgets PrintSupport)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/bin/Qt5${QT_LIB}${DEBUG_SUFFIX}.dll"
@@ -55,5 +78,6 @@ endif ()
 
 target_include_directories(shop_assistant PUBLIC ../include)
 target_include_directories(shop_assistant PUBLIC ../include/forms)
+
 
 

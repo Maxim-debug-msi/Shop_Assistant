@@ -2,10 +2,9 @@
 // Created by Maxim on 25.09.2022.
 //
 
-#include <docJournal_form.h>
-#include <addProd_form.h>
+#include <docJournal.h>
 
-forms::docJournal_form::docJournal_form(QWidget* parent) : QObject(nullptr), mainWgt(new QWidget(parent)), data(nullptr),
+form::docJournal::docJournal(QWidget* parent) : QObject(nullptr), mainWgt(new QWidget(parent)), data(nullptr),
                                      summaryDL(new QLineEdit(mainWgt)), hl4(new QHBoxLayout), table(new QTableWidget),
                                      oT_model(new models::objectTree_model(docList)), docList(new QComboBox(mainWgt)),
                                      log(nullptr), tableWgt(new QWidget(mainWgt)), mainWindow(nullptr),
@@ -14,12 +13,12 @@ forms::docJournal_form::docJournal_form(QWidget* parent) : QObject(nullptr), mai
                                      summaryCreator(new QLineEdit(mainWgt)), creator(new QComboBox(mainWgt)),
                                      hl2(new QHBoxLayout), hl21(new QHBoxLayout), onOffCreator_btn(new QCheckBox(mainWgt)){}
 
-forms::docJournal_form::~docJournal_form()
+form::docJournal::~docJournal()
 {
     delete mainWgt;
 }
 
-void forms::docJournal_form::setupUI()
+void form::docJournal::setupUI()
 {
     std::function<void(std::unordered_map<std::wstring, variant*>&)> extractor =
             [&extractor, this](std::unordered_map<std::wstring, variant*>& map)
@@ -98,17 +97,17 @@ void forms::docJournal_form::setupUI()
     QObject::connect(search_btn, SIGNAL(clicked(bool)), this, SLOT(drawTable()));
 }
 
-void forms::docJournal_form::setData_ptr(implData* data_)
+void form::docJournal::setData_ptr(implData* data_)
 {
     data = data_;
 }
 
-void forms::docJournal_form::setLog_ptr(QTextBrowser* log_)
+void form::docJournal::setLog_ptr(QTextBrowser* log_)
 {
     log = log_;
 }
 
-void forms::docJournal_form::drawTable()
+void form::docJournal::drawTable()
 {
     table->setVisible(false);
     table->clear();
@@ -123,14 +122,14 @@ void forms::docJournal_form::drawTable()
     for(auto&& docDate : data->docsPtr[docList->currentText().toStdWString()]->docsOfDate)
     {
         table->setItem(row, 0, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.find(std::to_wstring(docDate))->second->get_map()[L"Номер"]->get_wstring())));
+        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Номер"]->get_wstring())));
 
         table->item(row, 0)->setIcon(QIcon(QString::fromStdString
-        (data->docStatusIcons[docPtr.find(std::to_wstring(docDate))->second->get_map()[L"Статус"]->get_wstring()])));
+        (data->docStatusIcons[docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Статус"]->get_wstring()])));
         table->item(row, 0)->setFlags(table->item(row, 0)->flags() ^ Qt::ItemIsEditable);
 
         table->setItem(row, 1, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.find(std::to_wstring(docDate))->second->get_map()[L"Дата"]->get_wstring())));
+        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Дата"]->get_wstring())));
         table->item(row, 1)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
         table->item(row, 1)->setWhatsThis(QString::fromStdWString(std::to_wstring(docDate)));
 
@@ -138,11 +137,11 @@ void forms::docJournal_form::drawTable()
         table->item(row, 2)->setFlags(table->item(row, 2)->flags() ^ Qt::ItemIsEditable);
 
         table->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.find(std::to_wstring(docDate))->second->get_map()[L"Автор"]->get_wstring())));
+        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Автор"]->get_wstring())));
         table->item(row, 3)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
 
         table->setItem(row, 4, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.find(std::to_wstring(docDate))->second->get_map()[L"Комментарий"]->get_wstring())));
+        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Комментарий"]->get_wstring())));
         table->item(row, 4)->setFlags(table->item(row, 3)->flags() ^ Qt::ItemIsEditable);
 
         row++;
@@ -158,14 +157,13 @@ void forms::docJournal_form::drawTable()
     table->setVisible(true);
 }
 
-void forms::docJournal_form::openDoc(const std::wstring& docNum, int& row)
+void form::docJournal::openDoc(const std::wstring& docNum, int& row)
 {
 
     switch (std::stoi(data->docInfo.docInfo[L"Тип"]->get_map()[docList->currentText().toStdWString()]->get_wstring()))
     {
         case 1:
         {
-            forms::create_addProdDoc(mainWindow, data, log, table, docNum, row);
             break;
         }
         default:
@@ -175,9 +173,14 @@ void forms::docJournal_form::openDoc(const std::wstring& docNum, int& row)
     }
 }
 
-void forms::docJournal_form::setMainWindow_ptr(QMdiArea* mainWindow_)
+void form::docJournal::setMainWindow_ptr(QMdiArea* mainWindow_)
 {
     mainWindow = mainWindow_;
+}
+
+implData *form::docJournal::getData_ptr()
+{
+    return data;
 }
 
 

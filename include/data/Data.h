@@ -56,7 +56,5 @@ namespace dataContain
     public:
         fileContainer docInfo;
     };
-
-    std::wstring w_asctime(std::tm*);
 }
 #endif //SHOP_ASSISTANT_DATA_H

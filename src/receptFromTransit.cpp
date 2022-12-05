@@ -4,9 +4,9 @@
 
 #include <QLineEdit>
 #include <QStringListModel>
-#include "receptFromTransit_form.h"
+#include "receptFromTransit.h"
 
-forms::receptFromTransit_form::receptFromTransit_form() : QObject(nullptr), mainWgt(new QWidget),
+form::receptFromTransit::receptFromTransit() : QObject(nullptr), mainWgt(new QWidget),
                             table(new QTableWidget(mainWgt)), data(nullptr),
                             addProduct(new QPushButton(mainWgt)), groupList(new QComboBox(mainWgt)),
                             vl(new QVBoxLayout(mainWgt)), hl(new QHBoxLayout), gl(new QGridLayout),
@@ -14,17 +14,17 @@ forms::receptFromTransit_form::receptFromTransit_form() : QObject(nullptr), main
                             write(new QPushButton(mainWgt)), enter(new QPushButton(mainWgt)), hl2(new QHBoxLayout),
                             delProduct(new QPushButton(mainWgt)){}
 
-forms::receptFromTransit_form::~receptFromTransit_form()
+form::receptFromTransit::~receptFromTransit()
 {
     delete mainWgt;
 }
 
-void forms::receptFromTransit_form::setDataPtr(implData* dataPtr)
+void form::receptFromTransit::setDataPtr(implData* dataPtr)
 {
     data = dataPtr;
 }
 
-void forms::receptFromTransit_form::setupUi()
+void form::receptFromTransit::setupUi()
 {
     std::function<void(std::unordered_map<std::wstring, variant*>&)> extractor =
             [&extractor, this](std::unordered_map<std::wstring, variant*>& map)
@@ -47,7 +47,7 @@ void forms::receptFromTransit_form::setupUi()
     cols << "objectName";
     oT_model->setColumns(cols);
 
-    extractor(data->prodInfo.prodInfo.get()[L"Группы"]->get_map());
+    extractor(data->prodInfo.prodInfo[L"Группы"]->get_map());
 
     groupList->setModel(oT_model);
 
