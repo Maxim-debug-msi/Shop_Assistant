@@ -11,17 +11,21 @@
 #include <QLayout>
 #include <QMdiArea>
 #include <QMdiSubWindow>
-#include "implementations/implData.h"
-#include "data/Data.h"
-#include "forms/dialWindow_str.h"
-#include "forms/dialWindow_del.h"
+#include <QPushButton>
+#include <QLineEdit>
+#include <QMouseEvent>
+#include <unordered_map>
+#include "impls/implData.h"
+#include "data/data.h"
+//#include "forms/add_group_dialog.h"
+//#include "forms/delete_group_dialog.h"
 #include "utilities.h"
 
 
 namespace form
 {
 
-    class editProdGroup : public QObject
+    class editProdGroup : public QWidget
     {
     Q_OBJECT
 
@@ -41,19 +45,19 @@ namespace form
         void addNewGroup();
         void removeSelectedGroup();
 
-    public:
-        QWidget *mainWgt;
+    protected:
+        bool eventFilter(QObject* watcher, QEvent* event);
 
     private:
-        QObject* rootModelObj;
-        QTreeView *viewModel;
+        QObject* root_model_obj;
+        QTreeView *view_model;
         QTextBrowser* log;
-        QString objName;
-        models::objectTree_model *oT_model;
+        QString object_name;
+        models::objectTree_model *obj_tree_model;
         implData *data;
     private:
-        QPushButton* remElem_btn;
-        QPushButton* addElem_btn;
+        QPushButton* remove_elem_btn;
+        QPushButton* add_elem_btn;
 
     private:
         QVBoxLayout* main_l;

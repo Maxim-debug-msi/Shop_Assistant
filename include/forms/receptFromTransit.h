@@ -12,8 +12,8 @@
 #include <QComboBox>
 #include <vector>
 #include <string>
-#include "data/Data.h"
-#include "implementations/implData.h"
+#include "data/data.h"
+#include "impls/implData.h"
 #include "models/objectTree_model.h"
 
 namespace form

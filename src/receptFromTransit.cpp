@@ -36,9 +36,9 @@ void form::receptFromTransit::setupUi()
 
                     oT_model->addItem(obj_list[obj_list.size() - 1], QModelIndex());
 
-                    if(it.second != nullptr && it.second->is_map() && !it.second->is_empty_map())
+                    if(it.second != nullptr && it.second->is_map() && !it.second->map().empty())
                     {
-                        extractor(it.second->get_map());
+                        extractor(it.second->map());
                     }
                 }
             };
@@ -47,7 +47,7 @@ void form::receptFromTransit::setupUi()
     cols << "objectName";
     oT_model->setColumns(cols);
 
-    extractor(data->prodInfo.prodInfo[L"Группы"]->get_map());
+    //extractor(data->jsonData.prodInfo[L"group"]->map());
 
     groupList->setModel(oT_model);
 

@@ -30,9 +30,9 @@ void form::docJournal::setupUI()
 
                     oT_model->addItem(obj_list.last(), QModelIndex());
 
-                    if(it.second != nullptr && it.second->is_map() && !it.second->is_empty_map())
+                    if(it.second != nullptr && it.second->is_map() && !it.second->map().empty())
                     {
-                        extractor(it.second->get_map());
+                        extractor(it.second->map());
                     }
                 }
             };
@@ -41,7 +41,7 @@ void form::docJournal::setupUI()
     cols << "objectName";
     oT_model->setColumns(cols);
 
-    extractor(data->docInfo.docInfo[L"Тип"]->get_map());
+    //extractor(data->jsonData.docInfo[L"type"]->map());
 
     mainWgt->setWindowTitle("Журнал документов");
 
@@ -113,64 +113,64 @@ void form::docJournal::drawTable()
     table->clear();
 
     table->setColumnCount(5);
-    table->setRowCount(static_cast<int>(data->docsPtr[docList->currentText().toStdWString()]->docsOfDate.size()));
+    //table->setRowCount(static_cast<int>(data->docsPtr[docList->currentText().toStdWString()]->docsOfDate.size()));
     table->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
     table->setHorizontalHeaderLabels({"Номер", "Дата", "Тип", "Автор", "Комментарий"});
 
     int row{0};
-    auto docPtr = data->docsPtr[docList->currentText().toStdWString()]->docs;
-    for(auto&& docDate : data->docsPtr[docList->currentText().toStdWString()]->docsOfDate)
-    {
-        table->setItem(row, 0, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Номер"]->get_wstring())));
+    //auto docPtr = data->docsPtr[docList->currentText().toStdWString()]->docs;
+    //for(auto&& docDate : data->docsPtr[docList->currentText().toStdWString()]->docsOfDate)
+  //  {
+       // table->setItem(row, 0, new QTableWidgetItem(QString::fromStdWString
+       // (docPtr.search(std::to_wstring(docDate))->second->map()[L"doc_number"]->wstring())));
 
-        table->item(row, 0)->setIcon(QIcon(QString::fromStdString
-        (data->docStatusIcons[docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Статус"]->get_wstring()])));
-        table->item(row, 0)->setFlags(table->item(row, 0)->flags() ^ Qt::ItemIsEditable);
+       // table->item(row, 0)->setIcon(QIcon(QString::fromStdString
+       // (data->docStatusIcons[docPtr.search(std::to_wstring(docDate))->second->map()[L"Статус"]->wstring()])));
+       // table->item(row, 0)->setFlags(table->item(row, 0)->flags() ^ Qt::ItemIsEditable);
 
-        table->setItem(row, 1, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Дата"]->get_wstring())));
-        table->item(row, 1)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
-        table->item(row, 1)->setWhatsThis(QString::fromStdWString(std::to_wstring(docDate)));
+       // table->setItem(row, 1, new QTableWidgetItem(QString::fromStdWString
+       // (docPtr.search(std::to_wstring(docDate))->second->map()[L"Дата"]->wstring())));
+       // table->item(row, 1)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
+       // table->item(row, 1)->setWhatsThis(QString::fromStdWString(std::to_wstring(docDate)));
 
-        table->setItem(row, 2, new QTableWidgetItem(QString::fromStdWString(docList->currentText().toStdWString())));
-        table->item(row, 2)->setFlags(table->item(row, 2)->flags() ^ Qt::ItemIsEditable);
+       // table->setItem(row, 2, new QTableWidgetItem(QString::fromStdWString(docList->currentText().toStdWString())));
+       // table->item(row, 2)->setFlags(table->item(row, 2)->flags() ^ Qt::ItemIsEditable);
 
-        table->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Автор"]->get_wstring())));
-        table->item(row, 3)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
+       // table->setItem(row, 3, new QTableWidgetItem(QString::fromStdWString
+       // (docPtr.search(std::to_wstring(docDate))->second->map()[L"Автор"]->wstring())));
+       // table->item(row, 3)->setFlags(table->item(row, 1)->flags() ^ Qt::ItemIsEditable);
 
-        table->setItem(row, 4, new QTableWidgetItem(QString::fromStdWString
-        (docPtr.search(std::to_wstring(docDate))->second->get_map()[L"Комментарий"]->get_wstring())));
-        table->item(row, 4)->setFlags(table->item(row, 3)->flags() ^ Qt::ItemIsEditable);
+       // table->setItem(row, 4, new QTableWidgetItem(QString::fromStdWString
+        //(docPtr.search(std::to_wstring(docDate))->second->map()[L"Комментарий"]->wstring())));
+       // table->item(row, 4)->setFlags(table->item(row, 3)->flags() ^ Qt::ItemIsEditable);
 
         row++;
     }
-    table->resizeColumnsToContents();
+  //  table->resizeColumnsToContents();
 
-    QObject::connect(table, &QTableWidget::cellDoubleClicked, [this](int row, int col)
-    {
-        openDoc(table->item(row, 1)->whatsThis().toStdWString(), row);
+   // QObject::connect(table, &QTableWidget::cellDoubleClicked, [this](int row, int col)
+    //{
+   //     openDoc(table->item(row, 1)->whatsThis().toStdWString(), row);
+//
+   // });
 
-    });
-
-    table->setVisible(true);
-}
+   // table->setVisible(true);
+//}
 
 void form::docJournal::openDoc(const std::wstring& docNum, int& row)
 {
 
-    switch (std::stoi(data->docInfo.docInfo[L"Тип"]->get_map()[docList->currentText().toStdWString()]->get_wstring()))
-    {
-        case 1:
-        {
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
+    //switch (std::stoi(data->docInfo.docInfo[L"Тип"]->map()[docList->currentText().toStdWString()]->wstring()))
+   // {
+    //    case 1:
+    //    {
+   //         break;
+   //     }
+  //      default:
+   //     {
+   //         break;
+   //     }
+   // }
 }
 
 void form::docJournal::setMainWindow_ptr(QMdiArea* mainWindow_)

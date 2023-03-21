@@ -20,9 +20,9 @@
 #include <QTableWidget>
 #include <QMdiSubWindow>
 #include <utility>
-#include "implementations/implData.h"
+#include "impls/implData.h"
 #include <ctime>
-#include "data/Data.h"
+#include "data/data.h"
 #include "utilities.h"
 
 namespace form
@@ -65,26 +65,35 @@ private:
     QLineEdit* d_name;            //d_* - description
     QLineEdit* name;
 
-    QLineEdit* d_printName;
-    QLineEdit* printName;
+    QLineEdit* d_print_name;
+    QLineEdit* print_name;
 
-    QLineEdit* d_barCode;
-    QLineEdit* barCode;
+    QLineEdit* d_barcode;
+    QLineEdit* barcode;
 
-    QLineEdit* d_oPrice;
-    QDoubleSpinBox* oPrice;
+    QLineEdit* d_retail_price;
+    QDoubleSpinBox* retail_price;
 
-    QLineEdit* d_rPrice;
-    QDoubleSpinBox* rPrice;
+    QLineEdit* d_trade_price;
+    QDoubleSpinBox* trade_price;
 
-    QLineEdit* d_expDate;
-    QSpinBox* expDate;
+    QLineEdit* d_exp_date;
+    QSpinBox* exp_date;
+
+    QLineEdit* d_provider;
+    QLineEdit* provider;
+
+    QLineEdit* d_qrcode;
+    QLineEdit* qrcode;
+
+    QLineEdit* d_count;
+    QDoubleSpinBox* count;
 
     QToolButton* actions_btn;
     QMenu* actions;
-    QAction* saveProduct;
-    QAction* deleteProduct;
-    QAction* editProduct;
+    QAction* save_product;
+    QAction* delete_product;
+    QAction* edit_product;
 
 private:
     QVBoxLayout* vl;  //main
@@ -97,16 +106,19 @@ private:
     QHBoxLayout* hl5; //o_price
     QHBoxLayout* hl6; //r_price
     QHBoxLayout* hl7; //expiration date
+    QHBoxLayout* provider_l;
+    QHBoxLayout* qrcode_l;
+    QHBoxLayout* count_l;
 
 
 private:
-    QObject* rootModelObj;
+    QObject* root_model_obj;
     implData* data;
     models::objectTree_model* oT_model;
     QTextBrowser* log;
-    std::wstring productCode;
-    std::wstring productGroup;
-    std::wstring oldGroup;
+    std::wstring product_code;
+    std::wstring product_group;
+    std::wstring old_group;
     int formStatus{3}; // 0-edit, 1-enter, 2-delete, 3-new
 };
 

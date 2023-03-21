@@ -16,10 +16,10 @@
 #include <QPrintDialog>
 #include <vector>
 #include "models/objectTree_model.h"
-#include "implementations/implData.h"
-#include "data/Data.h"
+#include "impls/implData.h"
+#include "data/data.h"
 #include "forms/prodCard.h"
-#include "forms/termoPrint.h"
+#include "forms/thermalLabel_print.h"
 
 
 namespace form
@@ -35,7 +35,7 @@ namespace form
 
         void setupUI();
 
-        void setMainWindow_ptr(QMdiArea*);
+        void setMdiAreaPtr(QMdiArea*);
 
     public slots:
         void refillingTable(const std::wstring&);
@@ -46,10 +46,10 @@ namespace form
         void printer();
 
     private:
-        QPushButton* openProdCard_btn;
-        QPushButton* showHideModel_btn;
+        QPushButton* open_prod_card_btn;
+        QPushButton* show_hide_model_btn;
         QPushButton* printer_btn;
-        QWidget* tableBoard;
+        QWidget* table_board;
 
     private:
         QVBoxLayout* main_l;
@@ -60,17 +60,17 @@ namespace form
         std::map<std::wstring, std::pair<QTableWidget*, int>> prodSearch_code; //словарь для быстрого поиска товара в tables
         std::map<std::wstring, QTableWidget*> tables;
 
-        QObject* rootModelObj;
+        QObject* root_model_obj;
 
-        QTreeView* viewModel;
-        models::objectTree_model* oT_model;
+        QTreeView* view_model;
+        models::objectTree_model* obj_tree_model;
 
         implData* data;
-        QMdiArea* mainWindow;
+        QMdiArea* mdiArea;
         QTextBrowser* log;
     };
 
-    void make_prodTable(QMdiArea*, implData*, QTextBrowser*);
+    void make_prodTable(QMdiArea* mdiArea_, implData* data, QTextBrowser* log);
 }
 
 

@@ -2,62 +2,64 @@
 // Created by Maxim on 11.08.2022.
 //
 
-#include <QLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <unordered_map>
 #include "editProdGroup.h"
 
-form::editProdGroup::editProdGroup(implData* data_, QTextBrowser* log_, QWidget* parent) : mainWgt(new QWidget(parent)),
-QObject(nullptr), viewModel(new QTreeView(mainWgt)), rootModelObj(new QObject(mainWgt)),
-oT_model(new models::objectTree_model(viewModel)), data(data_), remElem_btn(new QPushButton(mainWgt)),
-addElem_btn(new QPushButton(mainWgt)), log(log_), main_l(new QVBoxLayout(mainWgt)),
-buttons_l(new QHBoxLayout(mainWgt)), model_l(new QGridLayout(mainWgt))
+form::editProdGroup::editProdGroup(implData* data_, QTextBrowser* log_, QWidget* parent) : QWidget(parent),
+view_model(new QTreeView(this)), root_model_obj(new QObject(this)),
+obj_tree_model(new models::objectTree_model(view_model)), data(data_), remove_elem_btn(new QPushButton(this)),
+add_elem_btn(new QPushButton(this)), log(log_), main_l(new QVBoxLayout(this)),
+buttons_l(new QHBoxLayout(this)), model_l(new QGridLayout(this))
 {}
 
 form::editProdGroup::~editProdGroup()
 {
-    delete oT_model;
+
 }
 
 void form::editProdGroup::setupUI()
 {
-    groupExtractor(data->prodInfo.prodInfo[L"Группы"]->get_map(), rootModelObj);
-
     QStringList cols;
     cols << "objectName";
-    oT_model->setColumns(cols);
+    obj_tree_model->setColumns(cols);
 
-    oT_model->addItem(rootModelObj->children().first(), QModelIndex());
+    if(!data->prodInfo.prodInfo[L"groups"]->map().empty())
+    {
+        groupExtractor(data->prodInfo.prodInfo[L"groups"]->map(), root_model_obj);
+        for(auto&& obj : root_model_obj->children())
+        {
+            obj_tree_model->addItem(obj, QModelIndex());
+        }
+    }
 
-    viewModel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    viewModel->setHeaderHidden(true);
-    viewModel->setModel(oT_model);
-    viewModel->setFixedWidth(250);
+    view_model->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    view_model->setHeaderHidden(true);
+    view_model->setModel(obj_tree_model);
+    view_model->setFixedWidth(250);
+    view_model->viewport()->installEventFilter(this);
 
-    remElem_btn->setIcon(QIcon("../../icons/deleteIcon.png"));
-    remElem_btn->setFixedSize(20, 20);
-    remElem_btn->setToolTip("Удалить группу");
+    remove_elem_btn->setIcon(QIcon("../../icons/deleteIcon.png"));
+    remove_elem_btn->setFixedSize(20, 20);
+    remove_elem_btn->setToolTip("Удалить группу");
 
-    addElem_btn->setIcon(QIcon("../../icons/addIcon.png"));
-    addElem_btn->setFixedSize(20, 20);
-    addElem_btn->setToolTip("Добавить группу");
+    add_elem_btn->setIcon(QIcon("../../icons/addIcon.png"));
+    add_elem_btn->setFixedSize(20, 20);
+    add_elem_btn->setToolTip("Добавить группу");
 
     buttons_l->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    buttons_l->addWidget(addElem_btn);
-    buttons_l->addWidget(remElem_btn);
+    buttons_l->addWidget(add_elem_btn);
+    buttons_l->addWidget(remove_elem_btn);
 
-    model_l->addWidget(viewModel);
+    model_l->addWidget(view_model);
 
     main_l->addLayout(buttons_l);
     main_l->addLayout(model_l);
 
-    mainWgt->setWindowTitle("Редактор товарных групп");
-    mainWgt->setLayout(main_l);
+    this->setWindowTitle("Редактор товарных групп");
+    this->setWindowIcon(QIcon("../../icons/form.png"));
+    this->setLayout(main_l);
 
-    QObject::connect(remElem_btn, &QPushButton::clicked, this, &form::editProdGroup::removeSelectedGroup);
-
-    QObject::connect(addElem_btn, &QPushButton::clicked, this, &form::editProdGroup::addNewGroup);
+    QObject::connect(remove_elem_btn, &QPushButton::clicked, this, &form::editProdGroup::removeSelectedGroup);
+    QObject::connect(add_elem_btn, &QPushButton::clicked, this, &form::editProdGroup::addNewGroup);
 }
 
 void form::editProdGroup::groupExtractor(std::unordered_map<std::wstring, variant *>& map, QObject* parent)
@@ -67,26 +69,40 @@ void form::editProdGroup::groupExtractor(std::unordered_map<std::wstring, varian
         auto* obj = new QObject(parent);
         obj->setObjectName(QString::fromStdWString(it.first));
 
-        if(it.second->is_map() && !it.second->is_empty_map())
+        if(it.second->is_map() && !it.second->map().empty())
         {
-            groupExtractor(it.second->get_map(), obj);
+            groupExtractor(it.second->map(), obj);
         }
     }
 }
 
 void form::editProdGroup::addNewGroup()
 {
-    tag::mapWStrVar mwsv;
-    auto* obj = new QObject(static_cast<QObject*>(viewModel->selectionModel()->currentIndex().internalPointer()));
-    auto& parentMap = data->prodInfo.prodInfo.search(obj->parent()->objectName().toStdWString())->second;
-    auto* dlg = new dialWindow_str(mainWgt);
+    auto *dlg = new dialWindow_str(this);
+    QObject* obj;
+    std::unordered_map<std::wstring, variant*>* parentMap;
 
-    switch (dlg->exec())
+    if(view_model->selectionModel()->isSelected(view_model->selectionModel()->currentIndex()))
     {
+        obj = new QObject(static_cast<QObject *>(view_model->selectionModel()->currentIndex().internalPointer()));
+        parentMap = &data->prodInfo.prodInfo.search(obj->parent()->objectName().toStdWString())->second->map();
+    }
+    else
+    {
+        obj = new QObject(this);
+    }
+    switch (dlg->exec()) {
         case QDialog::Accepted:
-            objName = dlg->getInput();
-            obj->setObjectName(objName);
-            parentMap->get_map().insert(std::pair<std::wstring, variant*>(objName.toStdWString(), new variant(mwsv)));
+            object_name = dlg->getInput();
+            obj->setObjectName(object_name);
+            if(view_model->selectionModel()->isSelected(view_model->selectionModel()->currentIndex()))
+            {
+                parentMap->insert({object_name.toStdWString(), new variant(tag::mapWStrVar())});
+            }
+            else
+            {
+                data->prodInfo.prodInfo[L"groups"]->map().insert({object_name.toStdWString(), new variant(tag::mapWStrVar())});
+            }
             delete obj;
             refreshModel();
             saveChanges("");
@@ -97,55 +113,75 @@ void form::editProdGroup::addNewGroup()
             break;
 
     }
+
+    dlg->deleteLater();
 }
 
 void form::editProdGroup::removeSelectedGroup()
 {
-    auto* obj = static_cast<QObject*>(viewModel->selectionModel()->currentIndex().internalPointer());
-
-    objName = obj->objectName();
-
-    auto goodsMapIt = data->prodContain.products.search(obj->objectName().toStdWString());
-
-    if(obj->objectName() == "Товары")
+    if(!view_model->selectionModel()->isSelected(view_model->selectionModel()->currentIndex()))
     {
-        utl::logger("Нельзя удалить основную группу!", log);
+        utl::logger("Нет выбранной группы!", log);
         return;
     }
-    else if(!obj->children().empty())
+
+    auto* group_for_delete = static_cast<QObject*>(view_model->selectionModel()->currentIndex().internalPointer());
+
+    std::wstring deleting_group_name = group_for_delete->objectName().toStdWString();
+
+    auto selected_group_products_it = data->prodContain.products.search(deleting_group_name);
+
+    if(!group_for_delete->children().empty())
     {
         utl::logger("Данная группа включает в себя одну или несколько подгрупп. "
                     "Для удаления необходимо очистить все подгруппы.", log);
         return;
     }
-    else if(goodsMapIt == data->prodContain.products.end())
+    else if(selected_group_products_it == data->prodContain.products.end())
     {
-        data->prodInfo.prodInfo.search(obj->parent()->objectName().toStdWString())->second->get_map().
-        erase(data->prodInfo.prodInfo.search(obj->objectName().toStdWString()));
+        if(group_for_delete->parent()->objectName().isEmpty())
+        {
+            data->prodInfo.prodInfo[L"groups"]->map().erase(deleting_group_name);
+        }
+        else
+        {
+            data->prodInfo.prodInfo.search(group_for_delete->parent()->objectName().toStdWString())->second->map().
+                    erase(data->prodInfo.prodInfo.search(deleting_group_name));
+        }
         refreshModel();
         saveChanges("");
         return;
     }
-    else if(goodsMapIt != data->prodContain.products.end() || goodsMapIt->second->is_empty_map())
+    else
     {
-        auto* dlg_del = new dialWindow_del(data, &objName, mainWgt);
-        auto* productOut = &data->prodContain.products.search(obj->objectName().toStdWString())->second->get_map();
-        std::unordered_map<std::wstring, variant*>* productIn{nullptr};
+        QString name_of_new_group;
+        auto* dlg_del = new delete_group_dialog(data, &name_of_new_group, this);
+        auto* product_out = &selected_group_products_it->second->map();
+        std::unordered_map<std::wstring, variant*>* product_in;
 
         switch (dlg_del->exec())
         {
             case QDialog::Accepted:
-                productIn = &data->prodContain.products.search(objName.toStdWString())->second->get_map();
+                product_in = &data->prodContain.products.search(name_of_new_group.toStdWString())->second->map();
 
-                for(auto&& it : *productOut)
+                for(auto&& it : *product_out)
                 {
-                    it.second->get_map()[L"группа"]->set_wstring(objName.toStdWString());
+                    it.second->map()[L"groups"]->wstring() = name_of_new_group.toStdWString();
                 }
 
-                productIn->merge(*productOut);
-                data->prodContain.products.erase(obj->objectName().toStdWString());
-                data->prodInfo.prodInfo.search(obj->parent()->objectName().toStdWString())->second->get_map().
-                erase(data->prodInfo.prodInfo.search(obj->objectName().toStdWString()));
+                product_in->merge(*product_out);
+                data->prodContain.products.erase(deleting_group_name);
+
+                if(group_for_delete->parent() == root_model_obj)
+                {
+                    data->prodInfo.prodInfo[L"groups"]->map().erase(deleting_group_name);
+                }
+                else
+                {
+                    data->prodInfo.prodInfo.search(group_for_delete->parent()->objectName().toStdWString())->second->map().
+                            erase(data->prodInfo.prodInfo.search(deleting_group_name));
+                }
+
                 refreshModel();
                 saveChanges("");
                 break;
@@ -156,10 +192,10 @@ void form::editProdGroup::removeSelectedGroup()
 
         }
 
-        QObject::connect(dlg_del, &form::dialWindow_del::deleting, [this, obj](){
-            data->prodInfo.prodInfo.search(obj->objectName().toStdWString())->second->get_map().
-            erase(data->prodInfo.prodInfo.search(obj->objectName().toStdWString()));
-            data->prodContain.products.erase(obj->objectName().toStdWString());
+        QObject::connect(dlg_del, &form::delete_group_dialog::deleting, [this, deleting_group_name](){
+            data->prodInfo.prodInfo.search(deleting_group_name)->second->map().
+            erase(data->prodInfo.prodInfo.search(deleting_group_name));
+            data->prodContain.products.erase(deleting_group_name);
 
             refreshModel();
             saveChanges("");
@@ -169,24 +205,31 @@ void form::editProdGroup::removeSelectedGroup()
 
 void form::editProdGroup::refreshModel()
 {
-    viewModel->hide();
+    view_model->hide();
 
-    auto* tmpPtr = rootModelObj;
+    auto* tmpPtr = root_model_obj;
     delete tmpPtr;
-    rootModelObj = new QObject(mainWgt);
+    root_model_obj = new QObject(this);
 
-    auto* tmpModelPtr = oT_model;
+    auto* tmpModelPtr = obj_tree_model;
     delete tmpModelPtr;
-    oT_model = new models::objectTree_model(viewModel);
+    obj_tree_model = new models::objectTree_model(view_model);
 
-    groupExtractor(data->prodInfo.prodInfo[L"Группы"]->get_map(), rootModelObj);
     QStringList cols;
     cols << "objectName";
-    oT_model->setColumns(cols);
-    oT_model->addItem(rootModelObj->children().first(), QModelIndex());
-    viewModel->setModel(oT_model);
+    obj_tree_model->setColumns(cols);
 
-    viewModel->show();
+    if(!data->prodInfo.prodInfo[L"groups"]->map().empty())
+    {
+        groupExtractor(data->prodInfo.prodInfo[L"groups"]->map(), root_model_obj);
+        for(auto&& obj : root_model_obj->children())
+        {
+            obj_tree_model->addItem(obj, QModelIndex());
+        }
+    }
+
+    view_model->setModel(obj_tree_model);
+    view_model->show();
 }
 
 void form::editProdGroup::saveChanges(const std::string& filePath)
@@ -195,12 +238,29 @@ void form::editProdGroup::saveChanges(const std::string& filePath)
     data->prodInfo.save("../../data/products/prodInfo.json");
 }
 
+bool form::editProdGroup::eventFilter(QObject *watcher, QEvent *event)
+{
+    if(watcher == view_model->viewport() && event->type() == QEvent::MouseButtonRelease)
+    {
+        auto* me = dynamic_cast<QMouseEvent*>(event);
+        QModelIndex index = view_model->indexAt(me->pos());
+
+        if(!index.isValid())
+        {
+            view_model->clearSelection();
+            view_model->clearFocus();
+        }
+        return true;
+    }
+    return QWidget::eventFilter(watcher, event);
+}
+
 void form::create_editProdGroup(QMdiArea* mdiArea, implData* data, QTextBrowser* log)
 {
     auto subWindow = new QMdiSubWindow(mdiArea);
     auto newPG_e = new form::editProdGroup(data, log, subWindow);
 
-    subWindow->setWidget(newPG_e->mainWgt);
+    subWindow->setWidget(newPG_e);
     subWindow->setAttribute(Qt::WA_DeleteOnClose);
 
     newPG_e->setupUI();
@@ -209,9 +269,9 @@ void form::create_editProdGroup(QMdiArea* mdiArea, implData* data, QTextBrowser*
 
     subWindow->show();
 
-    QObject::connect(newPG_e->mainWgt, &QWidget::destroyed, [newPG_e, subWindow, mdiArea]()
+    QObject::connect(newPG_e, &QWidget::destroyed, [subWindow, mdiArea]()
     {
-        delete newPG_e;
+        //mdiArea->closeActiveSubWindow();
         mdiArea->removeSubWindow(subWindow);
         subWindow->deleteLater();
     });

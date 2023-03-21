@@ -19,8 +19,8 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <map>
-#include "implementations/implData.h"
-#include "data/Data.h"
+#include "impls/implData.h"
+#include "data/data.h"
 
 namespace form {
     class docJournal : QObject {

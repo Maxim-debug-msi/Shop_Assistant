@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>hidden.ico</file>
+    <file>visible.ico</file>
+    <file>save.ico</file>
+    <file>edit.ico</file>
+    <file>helper.ico</file>
+    <file>add.ico</file>
+    <file>delete.ico</file>
+    <file>form.ico</file>
+    <file>goods.ico</file>
+    <file>DataMatrix.ico</file>
+    <file>printer.ico</file>
+    <file>search_code.ico</file>
+    <file>checkbox.ico</file>
+  </qresource>
+</RCC>

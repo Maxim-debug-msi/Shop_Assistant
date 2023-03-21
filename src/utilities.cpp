@@ -2,6 +2,7 @@
 // Created by Maxim on 17.11.2022.
 //
 #include "utilities.h"
+#include "defs.h"
 
 std::wstring utl::w_asctime(std::tm* pTInfo)
 {
@@ -80,6 +81,71 @@ void utl::barcodeGen(const std::wstring& codeIn)
     ZXing::MultiFormatWriter writer = ZXing::MultiFormatWriter(format).setMargin(margin).setEccLevel(eccLevel);
     ZXing::Matrix<uint8_t> bitmap;
     bitmap = ZXing::ToMatrix<uint8_t>(writer.encode(code, 340, 30));
-    std::string filepath = "../../data/barcodes/" + code + ".png";
-    stbi_write_png(filepath.c_str(), bitmap.width(), bitmap.height(), 1, bitmap.data(), 0);
+    //std::string filepath = "../../data/barcodeGen/barcode.png";
+    stbi_write_png(BAR_GEN, bitmap.width(), bitmap.height(), 1, bitmap.data(), 0);
+}
+
+void utl::inc_productCode(std::wstring& prod_code)
+{
+    auto it  = prod_code.end() - 1;
+
+    while(true)
+    {
+        if (*it == L'9') {
+            *it = L'0';
+            --it;
+        } else {
+            ++(*it);
+            break;
+        }
+    }
+}
+
+QStringList utl::getProductGroupsList(implData* data)
+{
+    QStringList result;
+
+    std::function<void(std::unordered_map<std::wstring, variant*>&)> extractor =
+            [&extractor, &result](std::unordered_map<std::wstring, variant*>& map)
+            {
+                for(auto&& it : map)
+                {
+                    result << QString::fromStdWString(it.first);
+
+                    if(it.second != nullptr && it.second->is_map() && !it.second->map().empty())
+                    {
+                        extractor(it.second->map());
+                    }
+                }
+            };
+
+    extractor(data->jsonData.prodInfo[L"groups"]->map());
+
+    return result;
+}
+
+void utl::getProductGroupsTree(implData* data, QObject* root)
+{
+    std::function<void(std::unordered_map<std::wstring, variant*>&, QObject*)> extractor =
+            [&extractor](std::unordered_map<std::wstring, variant*>& map, QObject* parent)
+            {
+                for(auto&& it : map)
+                {
+                    auto* obj = new QObject(parent);
+                    obj->setObjectName(QString::fromStdWString(it.first));
+
+                    if(it.second != nullptr && it.second->is_map() && !it.second->map().empty())
+                    {
+                        extractor(it.second->map(), obj);
+                    }
+                }
+            };
+
+    extractor(data->jsonData.prodInfo[L"groups"]->map(), root);
+}
+
+QString utl::toStrCode(const int& code)
+{
+    QString codeStr{QString::number(code)};
+    return QString(7 - codeStr.size(), '0') + codeStr;
 }
