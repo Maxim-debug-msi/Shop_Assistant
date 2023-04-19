@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BarcodeScannerSettings</class>
+ <widget class="QWidget" name="BarcodeScannerSettings">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>496</width>
+    <height>453</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Параметры сканера штрих-кода</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="main_l">
+     <item>
+      <widget class="QGroupBox" name="commParam_gb">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Параметры связи</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="cp_l">
+          <item>
+           <layout class="QHBoxLayout" name="port_l">
+            <item>
+             <widget class="QLabel" name="port_lbl">
+              <property name="text">
+               <string>Порт:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="port_cbox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="updPortList_btn">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Обновить список портов</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../../../../icons/icons.qrc">
+                <normaloff>:/icons/update.ico</normaloff>:/icons/update.ico</iconset>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="boundRate_l">
+            <item>
+             <widget class="QLabel" name="boundRate_lbl">
+              <property name="text">
+               <string>Скорость:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="boundRate_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="bitCount_l">
+            <item>
+             <widget class="QLabel" name="bitCount_lbl">
+              <property name="text">
+               <string>Бит в байте:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="bitCount_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="parity_l">
+            <item>
+             <widget class="QLabel" name="parity_lbl">
+              <property name="text">
+               <string>Четность:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="parity_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="stopBit_l">
+            <item>
+             <widget class="QLabel" name="stopBit_lbl">
+              <property name="text">
+               <string>Стоп битов:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="stopBit_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="flowControl_l">
+            <item>
+             <widget class="QLabel" name="flowControl_lbl">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Контроль потока:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="flowControl_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="sensitivity_l">
+            <item>
+             <widget class="QLabel" name="sensitivity_lbl">
+              <property name="text">
+               <string>Чувствительность:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="sensitivity_sbox">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+              <property name="maximum">
+               <number>999</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="identifOpt_gb">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Параметры идентификации</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="identifOpt_l">
+          <item>
+           <layout class="QHBoxLayout" name="prefix_l">
+            <item>
+             <widget class="QLabel" name="prefix_lbl">
+              <property name="text">
+               <string>Перфикс:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="prefix_cbox"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="suffix_l">
+            <item>
+             <widget class="QLabel" name="suffix_lbl">
+              <property name="text">
+               <string>Суффикс</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="suffix_cbox"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="searchDevice_btn">
+     <property name="text">
+      <string>Поиск оборудования</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../../../icons/icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

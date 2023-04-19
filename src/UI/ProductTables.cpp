@@ -283,7 +283,7 @@ void form::ProductTables::deleteProductGroup()
 
 bool form::ProductTables::eventFilter(QObject *watcher, QEvent *event)
 {
-    if(watcher == ui_->groups_tree->viewport() && event->type() == QEvent::MouseButtonRelease)
+    if(event->type() == QEvent::MouseButtonRelease)
     {
         auto* me = dynamic_cast<QMouseEvent*>(event);
         QModelIndex index = ui_->groups_tree->indexAt(me->pos());
@@ -301,16 +301,11 @@ bool form::ProductTables::eventFilter(QObject *watcher, QEvent *event)
         }
         return true;
     }
-    else if((watcher == ui_->table_view_wgt || watcher == this) && event->type() == QEvent::MouseButtonRelease)
-    {
-        ui_->groups_tree->clearSelection();
-        ui_->groups_tree->clearFocus();
-    }
     else if(event->type() == QEvent::KeyPress)
     {
-        std::wcout << 1 << std::endl;
         auto* ke = dynamic_cast<QKeyEvent*>(event);
         keyPressEvent(ke);
+        return true;
     }
 
     return QWidget::eventFilter(watcher, event);

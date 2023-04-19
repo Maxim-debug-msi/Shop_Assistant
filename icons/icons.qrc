@@ -13,5 +13,6 @@
     <file>printer.ico</file>
     <file>search_code.ico</file>
     <file>checkbox.ico</file>
+    <file>update.ico</file>
   </qresource>
 </RCC>

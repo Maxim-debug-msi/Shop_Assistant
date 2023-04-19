@@ -100,6 +100,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="devices_btn">
+          <property name="text">
+           <string>Устройства</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -170,7 +177,7 @@
    <sender>servMessages_btn</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>show_hide_servMes()</slot>
+   <slot>serviceMessages()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>114</x>
@@ -189,7 +196,7 @@
    <slot>create_docJournal()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>776</x>
+     <x>383</x>
      <y>41</y>
     </hint>
     <hint type="destinationlabel">
@@ -214,14 +221,31 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>devices_btn</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openScannerSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>865</x>
+     <y>24</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>934</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>create_editProdGroup()</slot>
-  <slot>show_hide_servMes()</slot>
+  <slot>serviceMessages()</slot>
   <slot>create_productTable()</slot>
   <slot>create_receptFromTransit()</slot>
   <slot>create_addProd()</slot>
   <slot>create_docJournal()</slot>
   <slot>openProductTables()</slot>
+  <slot>openScannerSettings()</slot>
  </slots>
 </ui>

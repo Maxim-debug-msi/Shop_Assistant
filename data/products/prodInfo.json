@@ -1,9 +1,9 @@
 {
   "groups": 
   {
-    "Напитки": {},
-    "Крупы": {}
+    "Крупы": {},
+    "Напитки": {}
   },
-  "backup_codes": [],
-  "current_code": 10
+  "current_code": 10,
+  "backup_codes": []
 }

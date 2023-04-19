@@ -9,21 +9,22 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_PREFIX_PATH "C:/Users/Maxim/Desktop/Programming/Qt/5.15.2/mingw81_64/lib/cmake")
 
 set(SOURCES main.cpp UI/MainWindow.cpp objectTree_model.cpp data/data.cpp
-        receptFromTransit.cpp forms/docJournal.cpp UI/DataMatrixList.cpp
+        UI/DataMatrixList.cpp
         UI/dialogues/addGroup_dlg.cpp utilities.cpp UI/dialogues/deleteGroup_dlg.cpp
         stb_image_write.cpp UI/ProductTables.cpp UI/ProductCard.cpp UI/LabelThermalPrinter.cpp
-        UI/dialogues/searchProduct_dlg.cpp)
-set(LIBS ../include/UI/MainWindow/MainWindow.h ../include/models/objectTree_model.h ../include/forms/receptFromTransit.h
-        ../include/forms/docJournal.h ../include/utilities.h ../include/UI/DataMatrixList/DataMatrixList.h
+        UI/dialogues/searchProduct_dlg.cpp UI/BarcodeScanner.cpp)
+
+set(LIBS ../include/UI/MainWindow/MainWindow.h ../include/models/objectTree_model.h
+        ../include/utilities.h ../include/UI/DataMatrixList/DataMatrixList.h
         ../include/UI/dialogues/addGroup_dlg.h ../include/UI/dialogues/deleteGroup_dlg.h
         ../include/stb_image_write.h ../include/UI/productTables/ProductTables.h ../include/UI/productCard/ProductCard.h
         ../include/UI/thermalPrinter/LabelThermalPrinter.h ../include/impls/implData.h ../include/UI/dialogues/searchProduct_dlg.h
-        ../include/defs.h
+        ../include/defs.h ../include/UI/Devices/BarcodeScanner/BarcodeScanner.h ../include/impls/implDevices.h
         )
 
 set(UI ../include/UI/productTables/ProductTables.ui ../include/UI/MainWindow/MainWindow.ui
         ../include/UI/productCard/productCard.ui ../include/UI/thermalPrinter/thermalPrinter.ui
-        ../include/UI/DataMatrixList/DataMatrixList.ui)
+        ../include/UI/DataMatrixList/DataMatrixList.ui ../include/UI/Devices/BarcodeScanner/BarcodeScanner.ui)
 
 set(ICONS ../icons/icons.qrc)
 
@@ -35,6 +36,7 @@ find_package(Qt5 COMPONENTS
         Widgets
         PrintSupport
         Sql
+        SerialPort
         REQUIRED
         )
 
@@ -46,6 +48,7 @@ target_link_libraries(shop_assistant
         Qt5::Widgets
         Qt5::PrintSupport
         Qt5::Sql
+        Qt5::SerialPort
         ZXing
         )
 
@@ -133,6 +136,7 @@ target_include_directories(shop_assistant PUBLIC ../include/UI/productCard/)
 target_include_directories(shop_assistant PUBLIC ../include/UI/thermalPrinter/)
 target_include_directories(shop_assistant PUBLIC ../include/UI/dialogues/)
 target_include_directories(shop_assistant PUBLIC ../include/UI/DataMatrixList/)
+target_include_directories(shop_assistant PUBLIC ../include/UI/Devices/BarcodeScanner/)
 target_include_directories(shop_assistant PUBLIC ../include/forms/)
 
 

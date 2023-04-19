@@ -136,7 +136,7 @@ void form::LabelThermalPrinter::makeTemplateLabel()
         print();
     }
     else{
-        utl::logger("Товара с кодом " + ui_->code_line->text() + " не существует.", log_);
+        utl::logger("Товара с кодом " + ui_->code_line->text() + " не найден.", log_);
     }
     ui_->code_line->clear();
 }

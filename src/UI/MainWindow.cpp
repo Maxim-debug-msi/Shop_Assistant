@@ -3,39 +3,34 @@
 //
 #include "MainWindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow()), p_ImplData(new implData),
-docJournal(new form::docJournal(ui->mdiArea))
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui_(new Ui::MainWindow()), data_(new implData),
+devices_(new implDevices(nullptr))
 {
-    ui->setupUi(this);
-    ui->mdiArea->setOption(QMdiArea::DontMaximizeSubWindowOnActivation);
+    ui_->setupUi(this);
+    ui_->mdiArea->setOption(QMdiArea::DontMaximizeSubWindowOnActivation);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete p_ImplData;
-    delete docJournal;
+    delete ui_;
+    delete data_;
+    delete devices_;
 }
 
-void MainWindow::show_hide_servMes()
+void MainWindow::serviceMessages()
 {
-    if(ui->log->isHidden()) ui->log->show();
-    else ui->log->hide();
+    if(ui_->log->isHidden()) ui_->log->show();
+    else ui_->log->hide();
 }
 
 void MainWindow::create_editProdGroup()
 {
-//    form::create_editProdGroup(ui->mdiArea, p_ImplData, ui->log);
+
 }
 
 void MainWindow::create_receptFromTransit()
 {
-    auto newRFT_f = new form::receptFromTransit();
-    newRFT_f->setDataPtr(p_ImplData);
-    newRFT_f->setupUi();
-    newRFT_f->mainWgt->setParent(ui->mdiArea);
-    ui->mdiArea->addSubWindow(newRFT_f->mainWgt);
-    newRFT_f->mainWgt->showMaximized();
+
 }
 
 void MainWindow::create_addProd()
@@ -48,7 +43,12 @@ void MainWindow::create_docJournal()
 }
 
 void MainWindow::openProductTables() {
-    form::makeProductTables(p_ImplData, ui->log, ui->mdiArea);
+    form::makeProductTables(data_, ui_->log, ui_->mdiArea);
+}
+
+void MainWindow::openScannerSettings()
+{
+    devices_->scanner.show();
 }
 
 

@@ -9,11 +9,8 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include "ui_MainWindow.h"
-#include "forms/docJournal.h"
-#include "forms/prodTable.h"
-#include "forms/editProdGroup.h"
-#include "forms/receptFromTransit.h"
 #include "ProductTables.h"
+#include "implDevices.h"
 
 class MainWindow : public QMainWindow
 {
@@ -26,7 +23,7 @@ public:
 
 public slots:
 
-    void show_hide_servMes();
+    void serviceMessages();
 
     void create_editProdGroup();
 
@@ -38,10 +35,13 @@ public slots:
 
     void openProductTables();
 
+    void openScannerSettings();
+
 private:
-    Ui::MainWindow* ui;
-    implData* p_ImplData;
-    form::docJournal* docJournal;
+    Ui::MainWindow* ui_;
+    implData*       data_;
+    implDevices*    devices_;
+
 };
 
 #endif //SHOP_ASSISTANT_MAINWINDOW_H
